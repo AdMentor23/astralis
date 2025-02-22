@@ -1,0 +1,22 @@
+/*
+Theme Name: Astralis
+Theme URI: https://github.com/AdMentor23/astralis
+Author: AdMentor23
+Description: A community-powered system for a lasting life
+Version: 1.0
+License: GNU General Public License v2 or later
+Text Domain: astralis
+*/
+
+:root {
+    --navy: #1E2630;      /* Dark navy - primary background */
+    --gray: #4A5568;      /* Medium gray - secondary text */
+    --turquoise: #00BFB3; /* Turquoise - accent color */
+    --light: #F7F7F7;     /* Light gray - background & text */
+    
+    --background: var(--navy);
+    --card-background: rgba(74, 85, 104, 0.1);
+    --accent: var(--turquoise);
+    --text: var(--light);
+    --text-secondary: rgba(247, 247, 247, 0.7);
+} 
