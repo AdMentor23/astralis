@@ -5,22 +5,22 @@ import { useState, useEffect, useRef } from "react";
 //  DESIGN SYSTEM — Unified tokens for premium bespoke feel
 // ═══════════════════════════════════════════════════════════
 
-// ── Color Palette: Midnight Navy + Soča Emerald + Triglav White ──
+// ── Color Palette: Midnight Navy + Slovenian Green + Alpine Blue ──
 const C = {
   // Backgrounds
   bg:         "transparent",
   glass:      "rgba(10,15,30,0.72)",
   glassMid:   "rgba(10,15,30,0.60)",
   glassLight: "rgba(255,255,255,0.04)",
-  // Soča Emerald (primary action color)
-  emerald:    "#72B01D",
-  emeraldDim: "#5a8c17",
-  emeraldMid: "#8cc63f",
-  emeraldLt:  "#a4d65e",
-  emeraldGlow:"rgba(114,176,29,0.18)",
-  // Triglav Blue (accent, labels)
-  triglav:    "#5ba3d9",
-  triglavDim: "#005DA4",
+  // Slovenian Green (primary — Pantone 377 family)
+  emerald:    "#7AB800",
+  emeraldDim: "#5e8f00",
+  emeraldMid: "#8fcc1a",
+  emeraldLt:  "#a3d94e",
+  emeraldGlow:"rgba(122,184,0,0.18)",
+  // Alpine Blue (accent, labels)
+  triglav:    "#4a90c4",
+  triglavDim: "#1a5f8a",
   // Gold (politician path)
   gold:       "#fbbf24",
   goldDim:    "#d4a017",
@@ -34,15 +34,15 @@ const C = {
   subtle:     "#64748b",
   faint:      "#475569",
   // Borders
-  border:     "rgba(114,176,29,0.12)",
+  border:     "rgba(122,184,0,0.12)",
   borderFaint:"rgba(255,255,255,0.07)",
 };
 
 // ── Spacing ──
 const S = { xs:4, sm:8, md:16, lg:24, xl:32, xxl:48 } as const;
 
-// ── Radius ──  (only 4 values, ever)
-const R = { sm:8, md:12, lg:16, xl:20 } as const;
+// ── Radius ──  (bento-style: generous, boutique rounding)
+const R = { sm:10, md:14, lg:20, xl:24 } as const;
 
 // ── Typography ──
 const serif = "'Playfair Display', Georgia, serif";
@@ -168,9 +168,9 @@ function GenerativeBg({ showParticles }: { showParticles:boolean }) {
         background:`
           radial-gradient(ellipse 80% 50% at 20% 70%, rgba(15,74,46,0.35) 0%, transparent 70%),
           radial-gradient(ellipse 60% 80% at 75% 30%, rgba(15,74,46,0.20) 0%, transparent 60%),
-          radial-gradient(ellipse 50% 40% at 45% 55%, rgba(114,176,29,0.08) 0%, transparent 50%),
-          radial-gradient(ellipse 90% 60% at 60% 80%, rgba(114,176,29,0.06) 0%, transparent 65%),
-          conic-gradient(from 200deg at 30% 60%, transparent 0deg, rgba(15,74,46,0.18) 60deg, transparent 120deg, rgba(114,176,29,0.05) 200deg, transparent 280deg),
+          radial-gradient(ellipse 50% 40% at 45% 55%, rgba(122,184,0,0.08) 0%, transparent 50%),
+          radial-gradient(ellipse 90% 60% at 60% 80%, rgba(122,184,0,0.06) 0%, transparent 65%),
+          conic-gradient(from 200deg at 30% 60%, transparent 0deg, rgba(15,74,46,0.18) 60deg, transparent 120deg, rgba(122,184,0,0.05) 200deg, transparent 280deg),
           conic-gradient(from 340deg at 70% 40%, transparent 0deg, rgba(91,163,217,0.06) 45deg, transparent 90deg, rgba(15,74,46,0.12) 180deg, transparent 240deg)
         `,
       }} />
@@ -190,7 +190,7 @@ function GenerativeBg({ showParticles }: { showParticles:boolean }) {
         width:"100%", height:"100%",
         pointerEvents:"none", opacity:0.055,
       }}>
-        <g stroke="rgba(114,176,29,0.5)" strokeWidth="0.8" fill="none">
+        <g stroke="rgba(122,184,0,0.5)" strokeWidth="0.8" fill="none">
           {TOPO_PATHS.map((d,i) => <path key={i} d={d} />)}
         </g>
       </svg>
@@ -462,7 +462,7 @@ function CinematicIntro({ onDone }: { onDone:()=>void }) {
       <div style={{
         position:"absolute", width:"100%", height:"100%", right:"-20%", top:"-20%",
         borderRadius:"50%", pointerEvents:"none",
-        background:"radial-gradient(ellipse at center, rgba(114,176,29,0.2) 0%, transparent 60%)",
+        background:"radial-gradient(ellipse at center, rgba(122,184,0,0.2) 0%, transparent 60%)",
         animation:"srce-blob-b 5s ease forwards",
         willChange:"transform, opacity",
       }} />
@@ -490,7 +490,7 @@ function CinematicIntro({ onDone }: { onDone:()=>void }) {
         animation:"srce-topo-pulse 5s ease forwards",
         willChange:"opacity, filter",
       }}>
-        <g stroke="rgba(114,176,29,0.4)" strokeWidth="1" fill="none">
+        <g stroke="rgba(122,184,0,0.4)" strokeWidth="1" fill="none">
           {TOPO_PATHS.map((d,i) => <path key={i} d={d} />)}
         </g>
       </svg>
@@ -505,7 +505,7 @@ function CinematicIntro({ onDone }: { onDone:()=>void }) {
       {/* Layer 1f: Emerald tint (The Flow, 2-4s) */}
       <div style={{
         position:"absolute", inset:0, pointerEvents:"none",
-        background:"linear-gradient(180deg, transparent 20%, rgba(114,176,29,0.3), rgba(91,163,217,0.1))",
+        background:"linear-gradient(180deg, transparent 20%, rgba(122,184,0,0.3), rgba(91,163,217,0.1))",
         animation:"srce-tint-emerald 5s ease forwards",
       }} />
 
@@ -560,7 +560,7 @@ function BetaBanner() {
   if (dismissed) return null;
   return (
     <div style={{
-      background:`linear-gradient(135deg, rgba(0,93,164,0.12), rgba(114,176,29,0.06))`,
+      background:`linear-gradient(135deg, rgba(0,93,164,0.12), rgba(122,184,0,0.06))`,
       backdropFilter:"blur(8px)",
       border:`1px solid rgba(91,163,217,0.20)`,
       borderRadius:R.lg, padding:`${S.md}px ${S.lg}px`,
@@ -578,8 +578,8 @@ function BetaBanner() {
           letterSpacing:"0.08em", flexShrink:0, marginTop:2, fontFamily:sans,
         }}>BETA v1.0</span>
         <p style={{ fontSize:"0.78rem", color:C.muted, lineHeight:1.75, margin:0 }}>
-          Nahajate se v beta fazi projekta, ki razvija prvi slovenski digitalni poslušalec.
-          Razvijamo sistem, ki bo potreboval le <strong style={{color:C.white}}>3 minute vašega časa na teden</strong>.
+          Povezujemo slovenske zgodbe v eno. To je prvi korak —
+          potrebujemo le <strong style={{color:C.white}}>3 minute vašega časa</strong>, da začutimo skupni utrip.
         </p>
       </div>
     </div>
@@ -611,8 +611,8 @@ function SocialProofCounter() {
         background:C.emerald, animation:"pulse-dot 1.8s ease-in-out infinite",
       }} />
       <span style={{ fontSize:"0.75rem", color:C.muted, fontFamily:sans }}>
-        Trenutno sodeluje: <strong style={{ color:C.white, fontWeight:700 }}>{count}</strong> Slovencev,
-        ki si upajo sanjati o boljši državi.
+        <strong style={{ color:C.white, fontWeight:700 }}>{count}</strong> Slovencev
+        že diha z nami.
       </span>
     </div>
   );
@@ -625,8 +625,8 @@ function AccessibilityToggle({ largeText, onToggle }: { largeText:boolean; onTog
   return (
     <button onClick={onToggle} style={{
       position:"fixed", top:60, right:S.md, zIndex:25,
-      background: largeText ? "rgba(114,176,29,0.2)" : "rgba(255,255,255,0.06)",
-      border:`1px solid ${largeText ? "rgba(114,176,29,0.4)" : C.borderFaint}`,
+      background: largeText ? "rgba(122,184,0,0.2)" : "rgba(255,255,255,0.06)",
+      border:`1px solid ${largeText ? "rgba(122,184,0,0.4)" : C.borderFaint}`,
       borderRadius:R.sm, padding:`${S.xs+2}px ${S.md}px`,
       display:"flex", alignItems:"center", gap:S.xs+2,
       cursor:"pointer", transition:"all 0.2s",
@@ -640,7 +640,7 @@ function AccessibilityToggle({ largeText, onToggle }: { largeText:boolean; onTog
 }
 
 // ═══════════════════════════════════════════════════════════
-//  INTRO — National Digital Gathering
+//  INTRO — Začuti Domovino
 // ═══════════════════════════════════════════════════════════
 function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText:boolean }) {
   const [visible, setVisible] = useState(false);
@@ -680,25 +680,33 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
           textAlign:"center", marginBottom:S.xl,
           letterSpacing:"-0.02em",
         }}>
-          Slovenija, čas je,<br/>
+          Slovenija, združena<br/>
           <span style={{
             background:`linear-gradient(135deg, ${C.emeraldMid}, ${C.emerald})`,
             WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text",
-          }}>da se umerimo.</span>
+          }}>v enem utripu.</span>
         </h1>
 
-        {/* ── Modrost Neznanega Slovenca ── */}
+        {/* ── Subheadline ── */}
+        <p style={{
+          textAlign:"center", fontFamily:sans, fontSize:"clamp(0.88rem,2.5vw,1.05rem)",
+          color:C.muted, lineHeight:1.8, marginBottom:S.xl, maxWidth:420, marginLeft:"auto", marginRight:"auto",
+        }}>
+          Povezujemo gore, vode in ljudi v digitalni prostor, ki diha z nami.
+        </p>
+
+        {/* ── Glas, ki razume naše srce ── */}
         <div style={{
           background:C.glass, backdropFilter:"blur(12px)",
           border:`1px solid rgba(255,255,255,0.08)`,
           borderRadius:R.xl, padding:`${S.xl+4}px ${S.lg}px`, marginBottom:S.xl,
         }}>
-          <SectionLabel color={C.triglav}>Modrost Neznanega Slovenca</SectionLabel>
+          <SectionLabel color={C.triglav}>Glas, ki razume naše srce</SectionLabel>
 
           <p style={{ fontSize:bodyFs, color:C.muted, lineHeight:bodyLh, marginBottom:S.lg }}>
-            Obstaja človek, ki ga morda ne boste nikoli srečali na televiziji ali v parlamentu.
+            Obstaja človek, ki ga ne boste nikoli srečali na televiziji ali v parlamentu.
             Je eden izmed nas — tisti, ki je gradil naše tovarne, stal v vrstah in nikoli zamudil volitev.
-            Je glas tiste modrosti, ki mu Slovenci najbolj zaupamo: glas delavnega, poštenega očeta in dedka.
+            Glas delavnega, poštenega očeta in dedka.
           </p>
 
           {/* Sacred quote */}
@@ -720,33 +728,31 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
           </div>
 
           <p style={{ fontSize:bodyFs, color:C.muted, lineHeight:bodyLh, margin:0 }}>
-            Ta gospod želi ostati anonimen, a si želi le eno: da bi vi mislili dobro o sosedu,
-            tako kot on misli dobro o vas. Verjame, da lahko zgradimo Slovenijo, kjer si pomagamo
-            in kjer sistem vodi k zeleni, trajnostni rasti.
+            Želi ostati anonimen, a si želi le eno: da bi mislili dobro o sosedu,
+            tako kot on misli dobro o vas. V harmoniji z domovino.
           </p>
         </div>
 
         {/* ── V1.0 Call to Action ── */}
         <div style={{
-          background:`linear-gradient(135deg, rgba(0,93,164,0.10), rgba(114,176,29,0.06))`,
+          background:`linear-gradient(135deg, rgba(0,93,164,0.10), rgba(122,184,0,0.06))`,
           backdropFilter:"blur(10px)",
           border:`1px solid rgba(91,163,217,0.16)`,
           borderRadius:R.xl, padding:`${S.lg}px`, marginBottom:S.xl,
         }}>
-          <SectionLabel color={C.emerald}>V1.0 Anketa</SectionLabel>
+          <SectionLabel color={C.emerald}>Povezujemo gore, vode in ljudi</SectionLabel>
           <p style={{ fontSize:bodyFs, color:C.muted, lineHeight:bodyLh, marginBottom:S.md }}>
-            To je prva verzija ankete. Vaši odgovori so &ldquo;hrana&rdquo; za sistem, ki bo začel organizirati
-            in voditi Slovenijo na podlagi dejanskih potreb ljudi — ne pa interesov posameznikov.
+            Vaši odgovori oblikujejo sliko resnične Slovenije — ne tiste iz parlamenta,
+            ampak tiste, ki jo živite vsak dan.
           </p>
           <p style={{ fontSize:bodyFs, color:"rgba(255,255,255,0.78)", lineHeight:bodyLh, fontWeight:500, marginBottom:0 }}>
-            Vprašanje je le:{" "}
             <strong style={{ color:C.white }}>
-              Ali bomo začeli graditi svojo prihodnost zdaj, s svojo pametjo in svojo srčnostjo,
-              ali pa bomo čakali, da nam usodo določi nekdo drug od zunaj?
+              Ali bomo sami začeli graditi svojo prihodnost — ali čakamo,
+              da nam jo določi nekdo drug?
             </strong>
           </p>
           <p style={{ fontSize:"clamp(0.95rem,3vw,1.05rem)", fontWeight:800, fontFamily:sans, color:C.emerald, marginTop:S.md, marginBottom:0 }}>
-            Mi odločamo. Danes.
+            Začutimo skupni utrip.
           </p>
         </div>
 
@@ -772,27 +778,24 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
         </div>
 
         {/* ── CTA ── */}
-        <ActionBtn onClick={onContinue} large>Začni anketo →</ActionBtn>
+        <ActionBtn onClick={onContinue} large>Začuti domovino →</ActionBtn>
 
         <p style={{ marginTop:S.md, fontSize:"0.72rem", fontFamily:sans, color:C.faint, lineHeight:1.6, textAlign:"center" }}>
-          Anonimno · Brez registracije · Odgovori se združijo z vsemi drugimi
+          Anonimno · Brez registracije · Vaš glas se zlije z glasovi vseh
         </p>
 
         {/* ── Footer info box ── */}
         <div style={{
           marginTop:S.xl, padding:`${S.lg}px`,
-          background:"rgba(114,176,29,0.04)", backdropFilter:"blur(6px)",
-          border:`1px solid rgba(114,176,29,0.10)`,
+          background:"rgba(122,184,0,0.04)", backdropFilter:"blur(6px)",
+          border:`1px solid rgba(122,184,0,0.10)`,
           borderRadius:R.lg, textAlign:"left",
         }}>
           <p style={{ fontSize: largeText ? "0.82rem" : "0.76rem", fontFamily:sans, color:C.faint, lineHeight:1.9, margin:0 }}>
-            <span style={{ color:C.emerald, fontWeight:700 }}>Zakaj ta anketa?</span><br />
-            Tole gradi en človek v ozadju — z ljudmi, ki jih že celo življenje ni nihče vprašal,
-            pa so zmeraj bili zraven. Ljudje, ki jim ni bilo nikoli vseeno.
-            <br /><br />
-            Ko politik oceni zdravstvo s 6/10, državljan pa s 3.8/10 — to ni mnenje. To je dejstvo.
-            In ko imaš dovolj takih dejstev,{" "}
-            <span style={{ color:C.emerald, fontWeight:600 }}>se začne videti, kje moramo popraviti.</span>
+            <span style={{ color:C.emerald, fontWeight:700 }}>Zakaj?</span><br />
+            Ko politik oceni zdravstvo s 6, državljan pa s 3.8 — to ni mnenje. To je dejstvo.
+            Ko zberemo dovolj takih dejstev,{" "}
+            <span style={{ color:C.emerald, fontWeight:600 }}>se pokaže, kje Slovenija resnično diha.</span>
           </p>
           <div style={{ marginTop:S.md, fontSize:"0.65rem", fontFamily:sans, color:C.faint }}>
             #nismofejk · 2025 ·{" "}
@@ -979,7 +982,7 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
               <button key={n} onClick={()=>setDeptScores(s=>({...s,[d.id]:n}))} style={{
                 width:26, height:26, borderRadius:R.sm, border:"none", cursor:"pointer",
                 fontWeight:700, fontSize:"0.7rem", fontFamily:sans,
-                background: deptScores[d.id]===n?(n>=7?C.emerald:n>=4?"#f59e0b":C.red):deptScores[d.id]>n?`rgba(114,176,29,0.18)`:"rgba(255,255,255,0.05)",
+                background: deptScores[d.id]===n?(n>=7?C.emerald:n>=4?"#f59e0b":C.red):deptScores[d.id]>n?`rgba(122,184,0,0.18)`:"rgba(255,255,255,0.05)",
                 color: deptScores[d.id]>=n?"white":C.faint,
                 transition:"all 0.1s",
               }}>{n}</button>
@@ -1004,8 +1007,8 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
             <button key={d.id} onClick={()=>togglePriority(d.id)} style={{
               padding:`${S.sm+3}px ${S.md}px`, borderRadius:R.md, border:"none", cursor:"pointer",
               display:"flex", alignItems:"center", gap:S.sm, textAlign:"left",
-              background:sel?`rgba(114,176,29,0.14)`:C.glassLight,
-              outline:sel?`2px solid rgba(114,176,29,0.5)`:"2px solid transparent",
+              background:sel?`rgba(122,184,0,0.14)`:C.glassLight,
+              outline:sel?`2px solid rgba(122,184,0,0.5)`:"2px solid transparent",
               transition:"all 0.15s",
             }}>
               <span style={{ fontSize:"1rem" }}>{d.e}</span>
@@ -1054,9 +1057,9 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
           <button key={b.v} onClick={()=>setWishRealistic(b.v)} style={{
             flex:1, padding:`${S.md-2}px ${S.xs+2}px`, borderRadius:R.md, border:"none", cursor:"pointer",
             fontSize:"0.78rem", fontWeight:600, fontFamily:sans,
-            background:wishRealistic===b.v?`rgba(114,176,29,0.16)`:C.glassLight,
+            background:wishRealistic===b.v?`rgba(122,184,0,0.16)`:C.glassLight,
             color:wishRealistic===b.v?C.emeraldMid:C.muted,
-            outline:wishRealistic===b.v?`2px solid rgba(114,176,29,0.45)`:"2px solid transparent",
+            outline:wishRealistic===b.v?`2px solid rgba(122,184,0,0.45)`:"2px solid transparent",
             transition:"all 0.15s",
           }}>{b.l}</button>
         ))}
@@ -1248,8 +1251,8 @@ function ThankYou({ role }: { role:Role }) {
 
         <div style={{
           padding:`${S.md+2}px ${S.lg}px`,
-          background:"rgba(114,176,29,0.04)", backdropFilter:"blur(4px)",
-          border:`1px solid rgba(114,176,29,0.10)`, borderRadius:R.lg,
+          background:"rgba(122,184,0,0.04)", backdropFilter:"blur(4px)",
+          border:`1px solid rgba(122,184,0,0.10)`, borderRadius:R.lg,
         }}>
           <p style={{ fontSize:"0.75rem", fontFamily:sans, color:C.faint, lineHeight:1.85, margin:0 }}>
             Pošljite naprej — vsakemu, ki mu ni vseeno.<br />
@@ -1288,7 +1291,7 @@ function SurveyHeader({ phase, onBack }: { phase: string; onBack:()=>void }) {
           borderRadius:R.sm, fontSize:"0.72rem", fontWeight:500, fontFamily:sans,
           cursor:"pointer", transition:"all 0.15s",
         }}
-          onMouseEnter={e=>{const s=e.currentTarget.style;s.color="white";s.borderColor=`rgba(114,176,29,0.3)`;}}
+          onMouseEnter={e=>{const s=e.currentTarget.style;s.color="white";s.borderColor=`rgba(122,184,0,0.3)`;}}
           onMouseLeave={e=>{const s=e.currentTarget.style;s.color=C.muted;s.borderColor=C.borderFaint;}}
         >← Nazaj</button>
       )}
