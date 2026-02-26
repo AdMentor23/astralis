@@ -304,6 +304,50 @@ html, body {
 .anim-in  { animation: fade-in    0.4s ease both; }
 .anim-bar { animation: bar-grow   1s cubic-bezier(0.34,1.56,0.64,1) both; }
 
+/* ── Srce Slovenije cinematic intro ── */
+@keyframes srce-ken-burns {
+  0%   { transform: scale(2.2) translate(0%, -18%); }
+  38%  { transform: scale(2.0) translate(2%, -16%); }
+  40%  { transform: scale(2.0) translate(-2%, 8%); }
+  75%  { transform: scale(1.8) translate(0%, 10%); }
+  76%  { transform: scale(1.8) translate(0%, 10%); }
+  100% { transform: scale(1.0) translate(0%, 0%); }
+}
+@keyframes srce-saturation {
+  0%   { filter: saturate(1.6) brightness(1.1); }
+  38%  { filter: saturate(1.5) brightness(1.05); }
+  42%  { filter: saturate(1.8) brightness(1.0); }
+  75%  { filter: saturate(1.6) brightness(1.0); }
+  100% { filter: saturate(1.0) brightness(1.0); }
+}
+@keyframes srce-tint-gold {
+  0%   { opacity: 0.35; }
+  35%  { opacity: 0.3; }
+  42%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes srce-tint-emerald {
+  0%   { opacity: 0; }
+  38%  { opacity: 0; }
+  42%  { opacity: 0.3; }
+  75%  { opacity: 0.25; }
+  82%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes srce-heart-appear {
+  0%   { opacity: 0; transform: translate(-50%, -55%) scale(0.8); }
+  100% { opacity: 1; transform: translate(-50%, -55%) scale(1.0); }
+}
+@keyframes srce-heart-draw {
+  0%   { stroke-dashoffset: 600; }
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes srce-tagline {
+  0%   { opacity: 0; transform: translateY(10px); }
+  50%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 /* ── Input / textarea ── */
 .app-input {
   width: 100%;

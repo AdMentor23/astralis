@@ -265,36 +265,218 @@ function StepHeader({ step, total, title, sub, color, html }: {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  CINEMATIC INTRO
+//  CINEMATIC INTRO — "Srce Slovenije" (Heart of Slovenia)
+//  5.8s sequence: Peak → Flow → Connection → Fade
 // ═══════════════════════════════════════════════════════════
+
+interface Particle {
+  x:number; y:number; vx:number; vy:number;
+  size:number; opacity:number; life:number; decay:number;
+}
+
 function CinematicIntro({ onDone }: { onDone:()=>void }) {
-  const [phase, setPhase] = useState<"flag"|"fading">("flag");
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef<number>(0);
+  const [fadeOut, setFadeOut] = useState(false);
+
+  // ── Gold dust particle system ──
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("fading"), 2400);
-    const t2 = setTimeout(() => onDone(), 3200);
+    // Respect reduced-motion preference
+    if (typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      onDone();
+      return;
+    }
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+
+    const resize = () => {
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const COUNT = window.innerWidth < 768 ? 30 : 50;
+    const particles: Particle[] = [];
+
+    const spawn = (): Particle => ({
+      x: Math.random(),
+      y: Math.random(),
+      vx: (Math.random() - 0.5) * 0.0003,
+      vy: -Math.random() * 0.0004 - 0.0001,
+      size: Math.random() * 2 + 0.5,
+      opacity: Math.random() * 0.6 + 0.2,
+      life: 1,
+      decay: Math.random() * 0.003 + 0.001,
+    });
+
+    for (let i = 0; i < COUNT; i++) {
+      const p = spawn();
+      p.life = Math.random(); // stagger initial life
+      particles.push(p);
+    }
+
+    const animate = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalCompositeOperation = "lighter";
+
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= p.decay;
+
+        if (p.life <= 0 || p.y < -0.05 || p.x < -0.05 || p.x > 1.05) {
+          Object.assign(p, spawn());
+        }
+
+        const sx = p.x * w;
+        const sy = p.y * h;
+        const alpha = p.opacity * Math.max(p.life, 0);
+
+        // Core gold dot
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = "#fbbf24";
+        ctx.beginPath();
+        ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Soft glow halo
+        ctx.globalAlpha = alpha * 0.25;
+        ctx.beginPath();
+        ctx.arc(sx, sy, p.size * 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.globalCompositeOperation = "source-over";
+      ctx.globalAlpha = 1;
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("resize", resize);
+    };
+  }, [onDone]);
+
+  // ── Timing: fade-out + onDone ──
+  useEffect(() => {
+    if (typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t1 = setTimeout(() => setFadeOut(true), 5000);
+    const t2 = setTimeout(() => onDone(), 5800);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onDone]);
+
+  // Heart SVG path
+  const heartPath = "M100,180 C60,140 10,120 10,80 C10,40 40,20 70,20 C85,20 95,30 100,45 C105,30 115,20 130,20 C160,20 190,40 190,80 C190,120 140,140 100,180 Z";
 
   return (
     <div style={{
       position:"fixed", inset:0, zIndex:100,
-      background:"rgba(5,15,8,0.88)",
-      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
-      opacity: phase==="fading" ? 0 : 1,
+      overflow:"hidden",
+      background:"#050f08",
+      opacity: fadeOut ? 0 : 1,
       transition:"opacity 0.8s ease-out",
     }}>
-      <div style={{ position:"absolute", inset:0,
-        background:"radial-gradient(ellipse at 50% 40%, rgba(114,176,29,0.08) 0%, transparent 60%)" }} />
+      {/* Layer 1: Background with Ken Burns zoom/pan + saturation */}
       <div style={{
-        fontSize:"clamp(5rem,15vw,8rem)", lineHeight:1,
-        animation:"cinematic-flag-float 3s ease-in-out infinite",
-        filter:`drop-shadow(0 0 40px ${C.emeraldGlow})`, marginBottom:S.lg,
-      }}>🇸🇮</div>
+        position:"absolute",
+        top:"-25%", left:"-25%",
+        width:"150%", height:"150%",
+        backgroundImage:"url(/slovenia-bg.jpg)",
+        backgroundSize:"cover",
+        backgroundPosition:"center center",
+        animation:"srce-ken-burns 5s cubic-bezier(0.25,0.1,0.25,1) forwards, srce-saturation 5s ease forwards",
+        willChange:"transform, filter",
+      }} />
+
+      {/* Layer 1b: Golden morning glow (The Peak, 0-2s) */}
       <div style={{
-        fontFamily:serif, fontSize:"clamp(1.1rem,3.5vw,1.6rem)",
-        color:"rgba(255,255,255,0.7)", fontStyle:"italic",
-        letterSpacing:"0.02em", textAlign:"center", padding:`0 ${S.lg}px`,
-      }}>Slovenija, pozdravljena.</div>
+        position:"absolute", inset:0,
+        background:"linear-gradient(135deg, rgba(251,191,36,0.4), rgba(212,160,23,0.25), transparent 70%)",
+        animation:"srce-tint-gold 5s ease forwards",
+        pointerEvents:"none",
+      }} />
+
+      {/* Layer 1c: Emerald tint (The Flow, 2-4s) */}
+      <div style={{
+        position:"absolute", inset:0,
+        background:"linear-gradient(180deg, transparent 20%, rgba(114,176,29,0.3), rgba(91,163,217,0.1))",
+        animation:"srce-tint-emerald 5s ease forwards",
+        pointerEvents:"none",
+      }} />
+
+      {/* Layer 1d: Cinematic vignette (always on) */}
+      <div style={{
+        position:"absolute", inset:0,
+        background:"radial-gradient(ellipse 70% 60% at 50% 45%, transparent 0%, rgba(5,15,8,0.6) 100%)",
+        pointerEvents:"none",
+      }} />
+
+      {/* Layer 2: Gold dust particle canvas */}
+      <canvas ref={canvasRef} style={{
+        position:"absolute", inset:0,
+        width:"100%", height:"100%",
+        pointerEvents:"none",
+      }} />
+
+      {/* Layer 3: Heart SVG outline (The Connection, 4-5s) */}
+      <svg viewBox="0 0 200 200" style={{
+        position:"absolute",
+        top:"50%", left:"50%",
+        width:"clamp(120px, 28vw, 200px)",
+        height:"clamp(120px, 28vw, 200px)",
+        transform:"translate(-50%, -55%)",
+        opacity:0,
+        animation:"srce-heart-appear 1.0s ease 3.8s forwards",
+        filter:"drop-shadow(0 0 16px rgba(251,191,36,0.35))",
+        pointerEvents:"none",
+      }}>
+        <path
+          d={heartPath}
+          fill="none"
+          stroke="rgba(251,191,36,0.7)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="600"
+          strokeDashoffset="600"
+          style={{ animation:"srce-heart-draw 1.0s ease-in-out 4.0s forwards" }}
+        />
+      </svg>
+
+      {/* Layer 4: Tagline */}
+      <div style={{
+        position:"absolute",
+        bottom:"22%", left:0, right:0,
+        textAlign:"center",
+        padding:`0 ${S.lg}px`,
+        opacity:0,
+        animation:"srce-tagline 1.2s ease 4.3s forwards",
+        pointerEvents:"none",
+      }}>
+        <span style={{
+          fontFamily:serif,
+          fontSize:"clamp(1rem, 3.2vw, 1.6rem)",
+          color:"rgba(255,255,255,0.85)",
+          fontStyle:"italic",
+          letterSpacing:"0.04em",
+          textShadow:"0 2px 24px rgba(0,0,0,0.6)",
+        }}>
+          Kjer bije tvoje srce.
+        </span>
+      </div>
     </div>
   );
 }
