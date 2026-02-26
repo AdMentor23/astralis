@@ -5,9 +5,9 @@ import { useState, useEffect, useRef } from "react";
 //  SLOVENIAN THEME TOKENS — National Digital Gathering
 // ─────────────────────────────────────────────────────────
 const T = {
-  bg:        "#050f08",
-  surface:   "#0a1a0f",
-  surface2:  "#0f2318",
+  bg:        "transparent",
+  surface:   "rgba(10,26,15,0.75)",
+  surface2:  "rgba(15,35,24,0.7)",
   green:     "#72B01D",          // Slovenian Green
   greenDim:  "#5a8c17",
   greenGlow: "rgba(114,176,29,0.18)",
@@ -56,144 +56,35 @@ const DEPARTMENTS_POLITICIAN = [
 
 
 // ─────────────────────────────────────────────────────────
-//  SVG BACKGROUNDS — Triglav mountain
+//  PHOTO BACKGROUND — Slovenian landscape
+//  Photo of Triglav + Soča river under the Milky Way
+//  Dark overlay ensures all text/UI stays readable
 // ─────────────────────────────────────────────────────────
-function TriglavBg() {
-  const ridgeline = `
-    M 0,600 L 0,480
-    L 40,472 L 80,460 L 110,448
-    L 140,438 L 165,430 L 185,422
-    L 205,416 L 225,408 L 240,398
-    L 255,386 L 268,372 L 278,360
-    L 285,352 L 292,348 L 298,342
-    L 308,338 L 318,330 L 325,322
-    L 335,318 L 342,310 L 350,306
-    L 358,298 L 365,290 L 372,286
-    L 380,282 L 388,276 L 395,268
-    L 402,258 L 408,250 L 416,244
-    L 422,240 L 428,238 L 436,236
-    L 445,232 L 452,228
-    L 458,220 L 464,212
-    L 470,206 L 476,198
-    L 484,188 L 490,178
-    L 496,168 L 502,158
-    L 510,146 L 516,136
-    L 522,126 L 528,116
-    L 534,106 L 540,96
-    L 546,86 L 552,76
-    L 558,66 L 564,56
-    L 570,48 L 576,42
-    L 582,38 L 588,35
-    L 594,33 L 600,32
-    L 606,33 L 612,36
-    L 618,40 L 624,46
-    L 630,54 L 636,62
-    L 642,72 L 648,82
-    L 654,94 L 660,106
-    L 666,116 L 672,128
-    L 678,138 L 684,148
-    L 690,156 L 696,164
-    L 702,170 L 708,176
-    L 716,184 L 722,190
-    L 728,194 L 734,198
-    L 742,204 L 750,210
-    L 758,218 L 766,226
-    L 774,234 L 782,240
-    L 790,248 L 798,256
-    L 808,264 L 818,272
-    L 828,280 L 840,290
-    L 852,298 L 864,306
-    L 878,314 L 892,322
-    L 908,330 L 924,338
-    L 940,346 L 958,354
-    L 978,362 L 1000,370
-    L 1025,378 L 1050,386
-    L 1080,394 L 1110,402
-    L 1145,410 L 1180,418
-    L 1200,424 L 1200,600 Z
-  `;
-
-  const rockLines = [
-    "M 600,32 L 570,80 L 545,140",
-    "M 600,32 L 558,90 L 520,165",
-    "M 600,32 L 580,65 L 555,120 L 530,185",
-    "M 564,56 L 540,110 L 510,175",
-    "M 546,86 L 516,150 L 490,210",
-    "M 528,116 L 500,175 L 476,230",
-    "M 600,32 L 630,78 L 658,140",
-    "M 600,32 L 640,88 L 678,160",
-    "M 600,32 L 620,60 L 648,115 L 674,170",
-    "M 636,62 L 662,120 L 690,180",
-    "M 654,94 L 680,150 L 702,200",
-    "M 672,128 L 696,178 L 720,225",
-    "M 452,228 L 430,260 L 410,290",
-    "M 436,236 L 415,268 L 395,300",
-    "M 422,240 L 400,275 L 380,308",
-    "M 395,268 L 370,305 L 348,340",
-    "M 365,290 L 340,328 L 320,360",
-    "M 335,318 L 310,352 L 290,380",
-    "M 308,338 L 285,370 L 265,400",
-    "M 742,204 L 768,248 L 792,280",
-    "M 758,218 L 785,258 L 810,295",
-    "M 782,240 L 808,278 L 835,310",
-    "M 808,264 L 838,300 L 865,330",
-    "M 840,290 L 870,322 L 900,350",
-    "M 570,52 L 612,48 L 630,52",
-    "M 555,72 L 600,65 L 645,72",
-    "M 540,100 L 600,90 L 660,100",
-    "M 525,130 L 600,118 L 675,130",
-    "M 480,195 L 520,185 L 560,180",
-    "M 640,180 L 680,185 L 720,195",
-    "M 460,215 L 500,208 L 540,205",
-    "M 660,205 L 700,208 L 740,215",
-    "M 292,348 L 300,340 L 312,335",
-    "M 350,306 L 360,298 L 372,294",
-    "M 408,250 L 418,242 L 430,240",
-    "M 728,194 L 738,200 L 750,206",
-    "M 798,256 L 812,262 L 825,270",
-    "M 864,306 L 878,312 L 892,318",
-  ];
-
+function PhotoBg() {
   return (
-    <svg
-      viewBox="0 0 1200 600"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{
-        position:"fixed", bottom:0, left:0, width:"100%", height:"70vh",
-        pointerEvents:"none", zIndex:0,
-        userSelect:"none",
-      }}
-      preserveAspectRatio="xMidYMax meet"
-    >
-      <defs>
-        <linearGradient id="line-fade" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor="white" stopOpacity="0.08" />
-          <stop offset="30%"  stopColor="white" stopOpacity="0.18" />
-          <stop offset="60%"  stopColor="white" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="white" stopOpacity="0.35" />
-        </linearGradient>
-        <linearGradient id="detail-fade" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor="white" stopOpacity="0.04" />
-          <stop offset="50%"  stopColor="white" stopOpacity="0.12" />
-          <stop offset="100%" stopColor="white" stopOpacity="0.18" />
-        </linearGradient>
-      </defs>
-      <path d={ridgeline}
-        fill="none"
-        stroke="url(#line-fade)"
-        strokeWidth="2"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-      {rockLines.map((d, i) => (
-        <path key={i} d={d}
-          fill="none"
-          stroke="url(#detail-fade)"
-          strokeWidth="0.8"
-          strokeLinecap="round"
-        />
-      ))}
-    </svg>
+    <>
+      {/* Full-bleed photo */}
+      <div style={{
+        position:"fixed", inset:0, zIndex:0,
+        backgroundImage:"url(/slovenia-bg.jpg)",
+        backgroundSize:"cover",
+        backgroundPosition:"center top",
+        backgroundRepeat:"no-repeat",
+      }} />
+      {/* Dark overlay — keeps text readable while photo shows through */}
+      <div style={{
+        position:"fixed", inset:0, zIndex:0,
+        background:`linear-gradient(
+          to bottom,
+          rgba(5,15,8,0.72) 0%,
+          rgba(5,15,8,0.58) 25%,
+          rgba(5,15,8,0.50) 50%,
+          rgba(5,15,8,0.55) 75%,
+          rgba(5,15,8,0.78) 100%
+        )`,
+        pointerEvents:"none",
+      }} />
+    </>
   );
 }
 
@@ -323,7 +214,7 @@ function CinematicIntro({ onDone }: { onDone:()=>void }) {
   return (
     <div style={{
       position:"fixed", inset:0, zIndex:100,
-      background: T.bg,
+      background: "rgba(5,15,8,0.88)",
       display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
       opacity: phase === "fading" ? 0 : 1,
       transition: "opacity 0.8s ease-out",
@@ -423,7 +314,7 @@ function SocialProofCounter() {
   return (
     <div style={{
       position:"fixed", bottom:0, left:0, right:0, zIndex:15,
-      background:"rgba(5,15,8,0.92)", backdropFilter:"blur(12px)",
+      background:"rgba(5,15,8,0.80)", backdropFilter:"blur(14px)",
       borderTop:`1px solid ${T.border}`,
       padding:"10px 20px",
       display:"flex", alignItems:"center", justifyContent:"center", gap:10,
@@ -479,7 +370,7 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
       minHeight:"100vh", position:"relative", overflow:"hidden",
       display:"flex", alignItems:"center", justifyContent:"center",
       padding:"32px 20px 100px",
-      background:`radial-gradient(ellipse at 50% 20%, rgba(114,176,29,0.08) 0%, rgba(0,93,164,0.04) 40%, transparent 70%)`,
+      background:`radial-gradient(ellipse at 50% 20%, rgba(114,176,29,0.06) 0%, rgba(0,93,164,0.03) 40%, transparent 70%)`,
       opacity: visible ? 1 : 0,
       transition:"opacity 0.9s ease",
     }}>
@@ -1274,8 +1165,8 @@ function SurveyHeader({ phase, onBack }: { phase: string; onBack:()=>void }) {
   return (
     <div style={{
       position:"sticky", top:0, zIndex:20,
-      background:"rgba(5,15,8,0.94)", backdropFilter:"blur(14px)",
-      borderBottom:`1px solid rgba(114,176,29,0.1)`,
+      background:"rgba(5,15,8,0.82)", backdropFilter:"blur(16px)",
+      borderBottom:`1px solid rgba(114,176,29,0.12)`,
       padding:"13px 20px",
       display:"flex", alignItems:"center", justifyContent:"space-between",
     }}>
@@ -1314,10 +1205,10 @@ export default function Survey() {
   };
 
   return (
-    <div style={{ minHeight:"100vh", background:T.bg, position:"relative" }}
+    <div style={{ minHeight:"100vh", background:"transparent", position:"relative" }}
       className={largeText ? "large-text-mode" : ""}
     >
-      <TriglavBg />
+      <PhotoBg />
 
       {/* Cinematic intro overlay */}
       {phase === "cinematic" && (
