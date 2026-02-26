@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slovenia Background — Generative</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #060d1a;
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+  #scene {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+  }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  svg    { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* ── Gradient base ── */
+  #gradient-base {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 130% 80% at 50% 105%, rgba(15,74,46,0.42) 0%, transparent 55%),
+      radial-gradient(ellipse 80% 50% at 18% 72%, rgba(12,60,38,0.28) 0%, transparent 50%),
+      radial-gradient(ellipse 55% 65% at 80% 32%, rgba(10,45,30,0.16) 0%, transparent 48%),
+      radial-gradient(ellipse 45% 35% at 50% 30%, rgba(20,40,80,0.12) 0%, transparent 42%),
+      linear-gradient(175deg,
+        #050a18 0%,
+        #071020 12%,
+        #081422 22%,
+        #091726 34%,
+        #0a1a2a 46%,
+        #0b1d2d 56%,
+        #0a2129 66%,
+        #0a2726 76%,
+        #0b2e24 86%,
+        #0d3422 94%,
+        #0e3820 100%
+      );
+  }
+
+  /* ── Subtle noise texture ── */
+  #noise-overlay {
+    position: absolute; inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+
+  /* ── Vignette ── */
+  #vignette {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 72% 62% at 50% 42%, transparent 0%, rgba(5,10,24,0.5) 100%);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="scene">
+  <!-- Layer 0: Base gradient -->
+  <div id="gradient-base"></div>
+
+  <!-- Layer 1: SVG definitions + topographic lines + Triglav + River -->
+  <svg id="svg-layer" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Gaussian blur for depth integration -->
+      <filter id="blur-soft" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="1.2" />
+      </filter>
+      <filter id="blur-medium" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="3" />
+      </filter>
+      <filter id="blur-heavy" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="8" />
+      </filter>
+      <filter id="blur-corona" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="22" />
+      </filter>
+      <filter id="blur-corona-inner" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="12" />
+      </filter>
+      <filter id="blur-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" />
+      </filter>
+
+      <!-- Glow filter for Triglav line -->
+      <filter id="triglav-glow" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur1" />
+        <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur2" />
+        <feColorMatrix in="blur1" type="matrix"
+          values="0 0 0 0 0.32
+                  0 0 0 0 0.60
+                  0 0 0 0 0.82
+                  0 0 0 1.5 0" result="glow1" />
+        <feColorMatrix in="blur2" type="matrix"
+          values="0 0 0 0 0.25
+                  0 0 0 0 0.50
+                  0 0 0 0 0.72
+                  0 0 0 0.6 0" result="glow2" />
+        <feMerge>
+          <feMergeNode in="glow2" />
+          <feMergeNode in="glow1" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+
+      <!-- Glow filter for Soča river -->
+      <filter id="river-glow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur1" />
+        <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur2" />
+        <feColorMatrix in="blur1" type="matrix"
+          values="0 0 0 0 0.12
+                  0 0 0 0 0.68
+                  0 0 0 0 0.48
+                  0 0 0 1.2 0" result="glow1" />
+        <feColorMatrix in="blur2" type="matrix"
+          values="0 0 0 0 0.08
+                  0 0 0 0 0.55
+                  0 0 0 0 0.38
+                  0 0 0 0.5 0" result="glow2" />
+        <feMerge>
+          <feMergeNode in="glow2" />
+          <feMergeNode in="glow1" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+
+      <!-- Mask for fade edges on topographic lines -->
+      <linearGradient id="fade-h" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="black" />
+        <stop offset="6%"   stop-color="white" />
+        <stop offset="94%"  stop-color="white" />
+        <stop offset="100%" stop-color="black" />
+      </linearGradient>
+      <linearGradient id="fade-v" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="black" />
+        <stop offset="10%"  stop-color="white" />
+        <stop offset="90%"  stop-color="white" />
+        <stop offset="100%" stop-color="black" />
+      </linearGradient>
+      <mask id="edge-fade">
+        <rect width="1440" height="900" fill="url(#fade-h)" />
+        <rect width="1440" height="900" fill="url(#fade-v)" style="mix-blend-mode: multiply;" />
+      </mask>
+
+      <!-- Mask for Triglav depth integration — wider, softer -->
+      <radialGradient id="triglav-mask-grad" cx="50%" cy="40%" r="40%">
+        <stop offset="0%"   stop-color="white" stop-opacity="1" />
+        <stop offset="55%"  stop-color="white" stop-opacity="0.85" />
+        <stop offset="80%"  stop-color="white" stop-opacity="0.4" />
+        <stop offset="100%" stop-color="black" stop-opacity="0" />
+      </radialGradient>
+      <mask id="triglav-mask">
+        <rect width="1440" height="900" fill="url(#triglav-mask-grad)" />
+      </mask>
+    </defs>
+
+    <!-- ═══ Deep corona light behind peaks (atmospheric) ═══ -->
+    <g opacity="0.45">
+      <ellipse cx="720" cy="330" rx="320" ry="100" fill="rgba(20,60,110,0.25)" filter="url(#blur-corona)" />
+      <ellipse cx="720" cy="315" rx="180" ry="55" fill="rgba(40,100,165,0.2)" filter="url(#blur-corona-inner)" />
+      <ellipse cx="720" cy="300" rx="90" ry="28" fill="rgba(74,144,196,0.18)" filter="url(#blur-heavy)" />
+    </g>
+
+    <!-- ═══ Topographic wave lines (organic digital topography) ═══ -->
+    <g mask="url(#edge-fade)" opacity="0.14">
+      <!-- Upper ridge contours (green, high altitude) -->
+      <path d="M0,105 C120,82 260,128 400,95 C540,62 680,115 820,88 C960,60 1100,108 1240,82 C1340,65 1400,95 1440,78"
+            stroke="rgba(122,184,0,0.55)" stroke-width="0.7" fill="none" filter="url(#blur-soft)" />
+      <path d="M0,145 C140,118 280,162 420,132 C560,102 700,148 840,122 C980,96 1120,142 1260,118 C1360,100 1410,132 1440,115"
+            stroke="rgba(122,184,0,0.45)" stroke-width="0.65" fill="none" filter="url(#blur-soft)" />
+      <path d="M0,188 C160,158 310,198 460,172 C610,146 750,188 900,162 C1050,138 1190,178 1340,155 C1400,145 1430,168 1440,155"
+            stroke="rgba(122,184,0,0.38)" stroke-width="0.6" fill="none" />
+      <path d="M0,228 C180,202 330,238 490,215 C650,192 790,230 950,208 C1110,185 1250,220 1400,200 C1430,195 1440,205 1440,198"
+            stroke="rgba(122,184,0,0.3)" stroke-width="0.55" fill="none" />
+
+      <!-- Mid contours (blue-green transition, valley region) -->
+      <path d="M0,305 C150,282 310,322 470,298 C630,274 790,315 950,292 C1110,270 1270,308 1440,288"
+            stroke="rgba(74,144,196,0.4)" stroke-width="0.6" fill="none" />
+      <path d="M0,348 C170,325 340,362 510,340 C680,318 850,355 1020,335 C1190,315 1340,348 1440,332"
+            stroke="rgba(74,144,196,0.32)" stroke-width="0.55" fill="none" />
+      <path d="M0,392 C190,370 360,405 540,385 C720,365 890,398 1070,380 C1250,362 1380,390 1440,378"
+            stroke="rgba(60,150,130,0.28)" stroke-width="0.55" fill="none" />
+      <path d="M0,435 C160,415 330,448 500,428 C670,408 840,440 1010,422 C1180,404 1340,432 1440,420"
+            stroke="rgba(60,150,130,0.22)" stroke-width="0.5" fill="none" />
+
+      <!-- Lower terrain contours (deep green, forest floor) -->
+      <path d="M0,520 C220,498 400,535 580,515 C760,495 940,528 1120,510 C1300,492 1400,522 1440,508"
+            stroke="rgba(15,74,46,0.5)" stroke-width="0.6" fill="none" />
+      <path d="M0,568 C240,548 420,578 600,560 C780,542 960,572 1140,555 C1320,538 1410,565 1440,552"
+            stroke="rgba(15,74,46,0.4)" stroke-width="0.55" fill="none" />
+      <path d="M0,618 C260,600 440,628 620,610 C800,592 980,620 1160,605 C1340,590 1420,612 1440,602"
+            stroke="rgba(15,74,46,0.32)" stroke-width="0.5" fill="none" />
+      <path d="M0,668 C200,652 380,678 560,662 C740,646 920,672 1100,658 C1280,644 1400,665 1440,655"
+            stroke="rgba(15,74,46,0.25)" stroke-width="0.45" fill="none" />
+      <path d="M0,720 C230,706 410,730 590,716 C770,702 950,725 1130,712 C1310,700 1410,720 1440,710"
+            stroke="rgba(15,74,46,0.2)" stroke-width="0.4" fill="none" />
+      <path d="M0,772 C250,760 430,780 610,768 C790,756 970,776 1150,765 C1330,755 1420,772 1440,762"
+            stroke="rgba(15,74,46,0.15)" stroke-width="0.38" fill="none" />
+    </g>
+
+    <!-- ═══ Triglav mountain outline — iconic 3 peaks (static anchor) ═══ -->
+    <!--
+      Three distinct peaks using smooth bezier curves:
+        Left peak  ~608,340  (Mali Triglav — left shoulder)
+        Center peak 720,260  (Triglav summit — tallest, iconic)
+        Right peak ~832,348  (right shoulder)
+      Smooth saddles between peaks at ~660,392 and ~780,388
+    -->
+    <g mask="url(#triglav-mask)">
+      <!-- Deep glow (heavy blur, atmospheric depth) -->
+      <path
+        d="M470,468 C492,456 522,438 550,418 C574,400 594,372 610,338 C624,368 644,388 662,392 C680,396 698,384 708,358 C714,340 718,305 720,268 C722,305 726,340 732,358 C742,384 760,396 778,392 C796,388 816,368 830,338 C846,372 866,400 890,418 C918,438 948,456 970,468"
+        stroke="rgba(74,144,196,0.08)" stroke-width="14" fill="none"
+        filter="url(#blur-corona-inner)" stroke-linecap="round" stroke-linejoin="round" />
+
+      <!-- Mid glow layer -->
+      <path
+        d="M470,468 C492,456 522,438 550,418 C574,400 594,372 610,338 C624,368 644,388 662,392 C680,396 698,384 708,358 C714,340 718,305 720,268 C722,305 726,340 732,358 C742,384 760,396 778,392 C796,388 816,368 830,338 C846,372 866,400 890,418 C918,438 948,456 970,468"
+        stroke="rgba(74,144,196,0.16)" stroke-width="4.5" fill="none"
+        filter="url(#blur-glow)" stroke-linecap="round" stroke-linejoin="round" />
+
+      <!-- Core line (sharp, bright, the definitive edge) -->
+      <path
+        d="M470,468 C492,456 522,438 550,418 C574,400 594,372 610,338 C624,368 644,388 662,392 C680,396 698,384 708,358 C714,340 718,305 720,268 C722,305 726,340 732,358 C742,384 760,396 778,392 C796,388 816,368 830,338 C846,372 866,400 890,418 C918,438 948,456 970,468"
+        stroke="rgba(74,144,196,0.5)" stroke-width="1.2" fill="none"
+        filter="url(#triglav-glow)" stroke-linecap="round" stroke-linejoin="round" />
+
+      <!-- Extended ridgelines fading into landscape -->
+      <path d="M360,510 C390,498 420,488 445,478 C458,472 465,470 470,468"
+        stroke="rgba(74,144,196,0.10)" stroke-width="0.8" fill="none" filter="url(#blur-soft)"
+        stroke-linecap="round" />
+      <path d="M970,468 C975,470 982,472 995,478 C1020,488 1050,498 1080,510"
+        stroke="rgba(74,144,196,0.10)" stroke-width="0.8" fill="none" filter="url(#blur-soft)"
+        stroke-linecap="round" />
+    </g>
+
+    <!-- ═══ Soča river flow (pulsing emerald, from Triglav base) ═══ -->
+    <g mask="url(#edge-fade)">
+      <!-- Wide atmospheric glow -->
+      <path id="river-atmosphere"
+        d="M720,465 C700,488 660,505 620,515 C560,530 490,525 420,540 C350,555 280,548 210,562 C140,575 70,570 0,582"
+        stroke="rgba(38,180,130,0.05)" stroke-width="18" fill="none"
+        filter="url(#blur-corona-inner)" stroke-linecap="round" />
+
+      <!-- Mid river glow -->
+      <path
+        d="M720,465 C700,488 660,505 620,515 C560,530 490,525 420,540 C350,555 280,548 210,562 C140,575 70,570 0,582"
+        stroke="rgba(38,180,130,0.10)" stroke-width="5" fill="none"
+        filter="url(#blur-medium)" stroke-linecap="round" />
+
+      <!-- Core river line (animated pulse + flow) -->
+      <path id="river-core"
+        d="M720,465 C700,488 660,505 620,515 C560,530 490,525 420,540 C350,555 280,548 210,562 C140,575 70,570 0,582"
+        stroke="rgba(38,180,130,0.45)" stroke-width="1.1" fill="none"
+        filter="url(#river-glow)" stroke-linecap="round" />
+
+      <!-- Right branch (secondary river/stream) -->
+      <path
+        d="M720,465 C745,490 785,508 830,518 C900,534 975,530 1050,542 C1125,554 1200,550 1280,560 C1360,570 1410,568 1440,572"
+        stroke="rgba(38,180,130,0.04)" stroke-width="10" fill="none"
+        filter="url(#blur-heavy)" stroke-linecap="round" />
+      <path id="river-branch"
+        d="M720,465 C745,490 785,508 830,518 C900,534 975,530 1050,542 C1125,554 1200,550 1280,560 C1360,570 1410,568 1440,572"
+        stroke="rgba(38,180,130,0.28)" stroke-width="0.8" fill="none"
+        filter="url(#river-glow)" stroke-linecap="round" />
+    </g>
+
+    <!-- ═══ Triglav peak corona (subtle pulsing light at summit) ═══ -->
+    <g opacity="0.35">
+      <ellipse cx="720" cy="268" rx="70" ry="22" fill="rgba(74,144,196,0.22)" filter="url(#blur-heavy)">
+        <animate attributeName="opacity" values="0.22;0.32;0.22" dur="7s" repeatCount="indefinite" />
+      </ellipse>
+      <ellipse cx="720" cy="262" rx="35" ry="12" fill="rgba(120,180,220,0.18)" filter="url(#blur-medium)">
+        <animate attributeName="opacity" values="0.18;0.28;0.18" dur="5s" repeatCount="indefinite" />
+      </ellipse>
+      <!-- Tiny bright point at summit -->
+      <ellipse cx="720" cy="258" rx="8" ry="4" fill="rgba(180,210,240,0.12)" filter="url(#blur-soft)">
+        <animate attributeName="opacity" values="0.12;0.20;0.12" dur="3.5s" repeatCount="indefinite" />
+      </ellipse>
+    </g>
+  </svg>
+
+  <!-- Layer 2: Golden particle canvas -->
+  <canvas id="particles"></canvas>
+
+  <!-- Layer 3: Noise + vignette -->
+  <div id="noise-overlay"></div>
+  <div id="vignette"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  GOLDEN PARTICLE FIELD — twinkle + halos + warmth
+// ═══════════════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  function resize() {
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // ── Particle system ──
+  const COUNT = window.innerWidth < 768 ? 35 : 65;
+  const particles = [];
+
+  function spawn(randomLife) {
+    const yBias = Math.pow(Math.random(), 0.65);
+    return {
+      x: Math.random(),
+      y: yBias,
+      vx: (Math.random() - 0.5) * 0.00015,
+      vy: -Math.random() * 0.00022 - 0.00005,
+      size: Math.random() * 1.8 + 0.4,
+      baseOpacity: Math.random() * 0.55 + 0.15,
+      life: randomLife ? Math.random() : 1,
+      decay: Math.random() * 0.001 + 0.0004,
+      // Twinkle
+      twinkleSpeed: Math.random() * 3.0 + 1.2,
+      twinklePhase: Math.random() * Math.PI * 2,
+      twinkleDepth: Math.random() * 0.55 + 0.25,
+      // Halo
+      haloSize: Math.random() * 2.8 + 1.8,
+      // Color warmth
+      warmth: Math.random(),
+    };
+  }
+
+  for (let i = 0; i < COUNT; i++) {
+    particles.push(spawn(true));
+  }
+
+  let time = 0;
+
+  function animate() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    time += 0.016;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'lighter';
+
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= p.decay;
+
+      if (p.life <= 0 || p.y < -0.06 || p.x < -0.06 || p.x > 1.06) {
+        Object.assign(p, spawn(false));
+        continue;
+      }
+
+      const sx = p.x * w;
+      const sy = p.y * h;
+
+      // Twinkle: sinusoidal with second harmonic for organic feel
+      const t1 = Math.sin(time * p.twinkleSpeed + p.twinklePhase);
+      const t2 = Math.sin(time * p.twinkleSpeed * 0.37 + p.twinklePhase * 1.7);
+      const twinkle = 1 - p.twinkleDepth * (0.5 + 0.35 * t1 + 0.15 * t2);
+
+      const lifeAlpha = Math.min(p.life * 4, 1) * Math.max(p.life, 0);
+      const alpha = p.baseOpacity * lifeAlpha * twinkle;
+      if (alpha < 0.008) continue;
+
+      // Color: gold → amber → warm white variation
+      const r = Math.round(251 - p.warmth * 18);
+      const g = Math.round(191 - p.warmth * 25);
+      const b = Math.round(36 + p.warmth * 20);
+      const color = `rgb(${r},${g},${b})`;
+
+      // Core dot
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Inner halo
+      ctx.globalAlpha = alpha * 0.2;
+      ctx.beginPath();
+      ctx.arc(sx, sy, p.size * p.haloSize, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Outer soft halo (creates the "ring" effect)
+      ctx.globalAlpha = alpha * 0.06;
+      ctx.beginPath();
+      ctx.arc(sx, sy, p.size * p.haloSize * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+})();
+
+// ═══════════════════════════════════════════════════
+//  RIVER ANIMATION — flowing dash + pulse
+// ═══════════════════════════════════════════════════
+(function() {
+  const riverCore = document.getElementById('river-core');
+  const riverBranch = document.getElementById('river-branch');
+
+  if (riverCore) {
+    const len = riverCore.getTotalLength();
+    // Flowing dashed pattern
+    riverCore.style.strokeDasharray = `${len * 0.18} ${len * 0.06} ${len * 0.08} ${len * 0.04}`;
+    riverCore.style.strokeDashoffset = '0';
+
+    let offset = 0;
+    let pulseTime = 0;
+    function animateRiver() {
+      offset -= 0.4;
+      pulseTime += 0.016;
+      const pulse = 0.45 + 0.15 * Math.sin(pulseTime * 0.8);
+      riverCore.style.strokeDashoffset = offset;
+      riverCore.style.opacity = pulse;
+      requestAnimationFrame(animateRiver);
+    }
+    animateRiver();
+  }
+
+  if (riverBranch) {
+    const len = riverBranch.getTotalLength();
+    riverBranch.style.strokeDasharray = `${len * 0.12} ${len * 0.08} ${len * 0.06} ${len * 0.05}`;
+    riverBranch.style.strokeDashoffset = '0';
+
+    let offset = 0;
+    let pulseTime = 0;
+    function animateBranch() {
+      offset -= 0.25;
+      pulseTime += 0.016;
+      const pulse = 0.28 + 0.12 * Math.sin(pulseTime * 0.6 + 1.2);
+      riverBranch.style.strokeDashoffset = offset;
+      riverBranch.style.opacity = pulse;
+      requestAnimationFrame(animateBranch);
+    }
+    animateBranch();
+  }
+})();
+</script>
+</body>
+</html>
