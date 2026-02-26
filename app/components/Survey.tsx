@@ -63,24 +63,41 @@ const DEPARTMENTS_POLITICIAN = [
 function PhotoBg() {
   return (
     <>
-      {/* Full-bleed photo */}
+      {/* Full-bleed photo — zoomed out so full landscape is visible */}
       <div style={{
         position:"fixed", inset:0, zIndex:0,
         backgroundImage:"url(/slovenia-bg.jpg)",
         backgroundSize:"cover",
-        backgroundPosition:"center top",
+        backgroundPosition:"center 30%",
         backgroundRepeat:"no-repeat",
       }} />
-      {/* Dark overlay — keeps text readable while photo shows through */}
+      {/*
+        Intentional gradient overlay:
+        - Radial vignette darkens edges, keeps center brighter (spotlight on content)
+        - Vertical gradient: slightly darker top/bottom for header/footer readability,
+          lighter in the middle so the mountains + river + stars are visible
+      */}
+      <div style={{
+        position:"fixed", inset:0, zIndex:0,
+        background:`
+          radial-gradient(
+            ellipse 80% 70% at 50% 45%,
+            rgba(5,15,8,0.35) 0%,
+            rgba(5,15,8,0.52) 50%,
+            rgba(5,15,8,0.72) 100%
+          )
+        `,
+        pointerEvents:"none",
+      }} />
+      {/* Subtle top/bottom bands for header & footer readability */}
       <div style={{
         position:"fixed", inset:0, zIndex:0,
         background:`linear-gradient(
           to bottom,
-          rgba(5,15,8,0.72) 0%,
-          rgba(5,15,8,0.58) 25%,
-          rgba(5,15,8,0.50) 50%,
-          rgba(5,15,8,0.55) 75%,
-          rgba(5,15,8,0.78) 100%
+          rgba(5,15,8,0.55) 0%,
+          transparent 12%,
+          transparent 88%,
+          rgba(5,15,8,0.60) 100%
         )`,
         pointerEvents:"none",
       }} />
@@ -188,6 +205,7 @@ function GCard({ children, style = {} }: { children:React.ReactNode; style?:Reac
   return (
     <div style={{
       background: T.surface,
+      backdropFilter: "blur(8px)",
       border: `1px solid ${T.border}`,
       borderRadius: 16,
       padding: 20,
@@ -369,15 +387,15 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
     <div style={{
       minHeight:"100vh", position:"relative", overflow:"hidden",
       display:"flex", alignItems:"center", justifyContent:"center",
-      padding:"32px 20px 100px",
-      background:`radial-gradient(ellipse at 50% 20%, rgba(114,176,29,0.06) 0%, rgba(0,93,164,0.03) 40%, transparent 70%)`,
+      padding:"48px 28px 160px",
+      background:`radial-gradient(ellipse at 50% 20%, rgba(114,176,29,0.05) 0%, rgba(0,93,164,0.02) 40%, transparent 70%)`,
       opacity: visible ? 1 : 0,
       transition:"opacity 0.9s ease",
     }}>
-      <div style={{ maxWidth:540, width:"100%", position:"relative", zIndex:1 }}>
+      <div style={{ maxWidth:500, width:"100%", position:"relative", zIndex:1 }}>
 
         {/* Hashtag branding */}
-        <div style={{ textAlign:"center", marginBottom:12 }}>
+        <div style={{ textAlign:"center", marginBottom:16 }}>
           <div style={{
             display:"inline-block",
             fontSize:"clamp(2rem,7vw,3.2rem)",
@@ -419,9 +437,10 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
 
         {/* ── SECTION: Modrost Neznanega Slovenca ── */}
         <div style={{
-          background:"rgba(255,255,255,0.03)",
-          border:`1px solid rgba(255,255,255,0.06)`,
-          borderRadius:20, padding:"28px 24px", marginBottom:28,
+          background:"rgba(10,26,15,0.65)",
+          backdropFilter:"blur(12px)",
+          border:`1px solid rgba(255,255,255,0.08)`,
+          borderRadius:20, padding:"28px 26px", marginBottom:28,
         }}>
           <div style={{
             fontSize:"0.68rem", fontWeight:700, color:T.blue,
@@ -441,18 +460,19 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
 
           {/* ── THE QUOTE — serif, sacred styling ── */}
           <div style={{
-            background:"rgba(255,255,255,0.04)",
+            background:"rgba(255,255,255,0.06)",
+            backdropFilter:"blur(6px)",
             borderRadius:16,
-            padding:"24px 22px",
+            padding:"26px 24px",
             marginBottom:20,
-            borderLeft:`3px solid ${T.green}`,
+            borderLeft:`4px solid ${T.green}`,
           }}>
             <p style={{
               fontFamily:"'Playfair Display', Georgia, serif",
               fontSize: largeText ? "1.2rem" : "clamp(1.05rem,3vw,1.25rem)",
               fontStyle:"italic",
-              color:"rgba(255,255,255,0.88)",
-              lineHeight:1.75,
+              color:"rgba(255,255,255,0.92)",
+              lineHeight:1.8,
               margin:0,
             }}>
               &ldquo;Vse življenje sem gradil. Danes pa gledam, kako se ljudje razdvajajo.
@@ -472,9 +492,10 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
 
         {/* ── SECTION: Call to Action ── */}
         <div style={{
-          background:`linear-gradient(135deg, rgba(0,93,164,0.08), rgba(114,176,29,0.06))`,
-          border:`1px solid rgba(0,93,164,0.18)`,
-          borderRadius:20, padding:"24px 22px", marginBottom:28,
+          background:`linear-gradient(135deg, rgba(0,93,164,0.12), rgba(114,176,29,0.08))`,
+          backdropFilter:"blur(10px)",
+          border:`1px solid rgba(0,93,164,0.20)`,
+          borderRadius:20, padding:"24px 26px", marginBottom:28,
         }}>
           <div style={{
             fontSize:"0.68rem", fontWeight:700, color:T.green,
@@ -553,8 +574,8 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
 
         {/* "Zakaj ta anketa?" */}
         <div style={{
-          marginTop:28, padding:"20px 22px",
-          background:"rgba(114,176,29,0.03)",
+          marginTop:32, padding:"22px 24px",
+          background:"rgba(114,176,29,0.04)",
           border:`1px solid rgba(114,176,29,0.1)`,
           borderRadius:16, textAlign:"left",
         }}>
@@ -594,7 +615,7 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
 function RoleSelect({ onSelect }: { onSelect:(r:Role)=>void }) {
   return (
     <FadeSlide id="role">
-      <div style={{ maxWidth:500, margin:"0 auto", padding:"40px 20px 120px" }}>
+      <div style={{ maxWidth:480, margin:"0 auto", padding:"48px 28px 160px" }}>
         <div style={{ textAlign:"center", marginBottom:36 }}>
           <div style={{
             fontSize:"0.7rem", color:T.green, fontFamily:"monospace",
@@ -697,7 +718,7 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
 
   const W = (inner: React.ReactNode, stepKey: string) => (
     <FadeSlide id={stepKey}>
-      <div style={{ maxWidth:560, margin:"0 auto", padding:"32px 20px 120px" }}>{inner}</div>
+      <div style={{ maxWidth:520, margin:"0 auto", padding:"40px 28px 160px" }}>{inner}</div>
     </FadeSlide>
   );
 
@@ -907,7 +928,7 @@ function PoliticianSurvey({ onDone }: { onDone:()=>void }) {
 
   const W = (inner: React.ReactNode, stepKey: string) => (
     <FadeSlide id={stepKey}>
-      <div style={{ maxWidth:540, margin:"0 auto", padding:"32px 20px 120px" }}>{inner}</div>
+      <div style={{ maxWidth:500, margin:"0 auto", padding:"40px 28px 160px" }}>{inner}</div>
     </FadeSlide>
   );
 
@@ -1067,7 +1088,7 @@ function GreenBtn({ onClick, disabled, children, large }: { onClick:()=>void; di
 function ThankYou({ role }: { role:Role }) {
   return (
     <FadeSlide id="thankyou">
-      <div style={{ maxWidth:500, margin:"0 auto", textAlign:"center", padding:"60px 20px 120px", position:"relative" }}>
+      <div style={{ maxWidth:480, margin:"0 auto", textAlign:"center", padding:"60px 28px 180px", position:"relative" }}>
         {/* Animated flag */}
         <div style={{
           fontSize:"5rem", marginBottom:20, lineHeight:1,
@@ -1165,9 +1186,9 @@ function SurveyHeader({ phase, onBack }: { phase: string; onBack:()=>void }) {
   return (
     <div style={{
       position:"sticky", top:0, zIndex:20,
-      background:"rgba(5,15,8,0.82)", backdropFilter:"blur(16px)",
-      borderBottom:`1px solid rgba(114,176,29,0.12)`,
-      padding:"13px 20px",
+      background:"rgba(5,15,8,0.75)", backdropFilter:"blur(16px)",
+      borderBottom:`1px solid rgba(114,176,29,0.10)`,
+      padding:"14px 28px",
       display:"flex", alignItems:"center", justifyContent:"space-between",
     }}>
       <div style={{ fontSize:"0.95rem", fontWeight:900, letterSpacing:"-0.02em" }}>
