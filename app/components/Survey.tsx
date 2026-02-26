@@ -759,9 +759,7 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
             <span style={{ color:C.emerald, fontWeight:600 }}>se pokaže, kje Slovenija resnično diha.</span>
           </p>
           <div style={{ marginTop:S.md, fontSize:"0.65rem", fontFamily:sans, color:C.faint }}>
-            #nismofejk · 2025 ·{" "}
-            <a href="https://instagram.com/NEPRIDIPRAV" target="_blank" rel="noopener noreferrer"
-              style={{ color:C.emerald, fontWeight:700, textDecoration:"none" }}>@NEPRIDIPRAV</a>
+            #nismofejk · 2025
           </div>
         </div>
       </div>
@@ -1204,9 +1202,7 @@ function ThankYou({ role }: { role:Role }) {
           <div style={{ fontSize:"0.84rem", fontWeight:700, fontFamily:sans, color:C.white, marginBottom:S.sm }}>Kaj zdaj?</div>
           <p style={{ fontSize:"0.78rem", fontFamily:sans, color:C.muted, lineHeight:1.75, margin:0 }}>
             Ko zberemo dovolj odgovorov, bomo objavili skupno sliko — brez filtra, brez spina.
-            Spremljajte{" "}
-            <a href="https://instagram.com/NEPRIDIPRAV" target="_blank" rel="noopener noreferrer"
-              style={{ color:C.emerald, fontWeight:700, textDecoration:"none" }}>@NEPRIDIPRAV</a>{" "}za obvestilo.
+            Spremljajte nas za obvestilo.
           </p>
         </Card>
 
