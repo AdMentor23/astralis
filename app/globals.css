@@ -27,7 +27,39 @@ html, body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   overflow-y: auto;
+  line-height: 1.7;
 }
+
+/* ── Pulse CTA ── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 4px 24px rgba(114,176,29,0.35); }
+  50%      { box-shadow: 0 8px 40px rgba(114,176,29,0.55), 0 0 60px rgba(114,176,29,0.2); }
+}
+.pulse-cta {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+/* ── Cinematic fade ── */
+@keyframes cinematic-fade {
+  0%   { opacity: 0; }
+  40%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes cinematic-flag-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-12px) scale(1.05); }
+}
+
+/* ── Serif quote styling ── */
+.quote-serif {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+
+/* ── Large text mode ── */
+.large-text-mode { font-size: 18px !important; }
+.large-text-mode p, .large-text-mode div { line-height: 2 !important; }
+.large-text-mode .app-input { font-size: 18px !important; }
 
 /* ── Layout ── */
 #app-shell {
