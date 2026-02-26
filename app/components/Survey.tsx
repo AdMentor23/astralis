@@ -5,12 +5,12 @@ import { useState, useEffect, useRef } from "react";
 //  DESIGN SYSTEM — Unified tokens for premium bespoke feel
 // ═══════════════════════════════════════════════════════════
 
-// ── Color Palette: Deep Forest + Soča Emerald + Triglav White ──
+// ── Color Palette: Midnight Navy + Soča Emerald + Triglav White ──
 const C = {
   // Backgrounds
   bg:         "transparent",
-  glass:      "rgba(10,26,15,0.72)",
-  glassMid:   "rgba(10,26,15,0.60)",
+  glass:      "rgba(10,15,30,0.72)",
+  glassMid:   "rgba(10,15,30,0.60)",
   glassLight: "rgba(255,255,255,0.04)",
   // Soča Emerald (primary action color)
   emerald:    "#72B01D",
@@ -77,30 +77,128 @@ const DEPARTMENTS_POLITICIAN = [
 ];
 
 // ═══════════════════════════════════════════════════════════
-//  PHOTO BACKGROUND
+//  GENERATIVE BACKGROUND — "Abstract Slovenian Topography"
 // ═══════════════════════════════════════════════════════════
-function PhotoBg() {
+
+// Shared topographic line paths (used by GenerativeBg + CinematicIntro)
+const TOPO_PATHS = [
+  // Mountain ridgeline contours (upper)
+  "M0,120 C150,80 300,140 500,100 C700,60 850,130 1000,90",
+  "M0,150 C180,110 320,170 520,130 C720,90 870,155 1000,120",
+  "M0,185 C200,150 350,200 540,165 C730,130 880,180 1000,155",
+  // Valley / Soča river curves (mid)
+  "M0,260 C120,240 280,290 450,255 C620,220 780,275 1000,250",
+  "M0,295 C140,270 300,320 470,285 C640,250 800,300 1000,280",
+  "M0,330 C160,305 320,355 490,320 C660,285 820,330 1000,310",
+  "M0,360 C180,340 340,385 510,350 C680,315 840,360 1000,340",
+  // Lower terrain contours
+  "M0,430 C200,400 380,450 550,420 C720,390 860,435 1000,415",
+  "M0,465 C220,435 400,480 570,450 C740,420 880,460 1000,445",
+  "M0,500 C240,475 420,515 590,485 C760,455 900,490 1000,475",
+];
+
+function GenerativeBg({ showParticles }: { showParticles:boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef<number>(0);
+
+  // ── Persistent gold dust particles ──
+  useEffect(() => {
+    if (!showParticles) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const resize = () => {
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const COUNT = window.innerWidth < 768 ? 20 : 35;
+    const particles: Particle[] = [];
+    const spawn = (): Particle => ({
+      x: Math.random(), y: Math.random(),
+      vx: (Math.random() - 0.5) * 0.00025,
+      vy: -Math.random() * 0.00035 - 0.00008,
+      size: Math.random() * 1.8 + 0.4,
+      opacity: Math.random() * 0.5 + 0.15,
+      life: 1,
+      decay: Math.random() * 0.002 + 0.0008,
+    });
+    for (let i = 0; i < COUNT; i++) {
+      const p = spawn(); p.life = Math.random(); particles.push(p);
+    }
+
+    const animate = () => {
+      const w = window.innerWidth, h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalCompositeOperation = "lighter";
+      for (const p of particles) {
+        p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+        if (p.life <= 0 || p.y < -0.05 || p.x < -0.05 || p.x > 1.05) Object.assign(p, spawn());
+        const sx = p.x * w, sy = p.y * h, alpha = p.opacity * Math.max(p.life, 0);
+        ctx.globalAlpha = alpha; ctx.fillStyle = "#fbbf24";
+        ctx.beginPath(); ctx.arc(sx, sy, p.size, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = alpha * 0.2;
+        ctx.beginPath(); ctx.arc(sx, sy, p.size * 3, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
+      rafRef.current = requestAnimationFrame(animate);
+    };
+    rafRef.current = requestAnimationFrame(animate);
+
+    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener("resize", resize); };
+  }, [showParticles]);
+
   return (
     <>
+      {/* Layer 1: Midnight Navy base */}
       <div style={{
         position:"fixed", inset:0, zIndex:0,
-        backgroundImage:"url(/slovenia-bg.jpg)",
-        backgroundSize:"cover",
-        backgroundPosition:"center 30%",
-        backgroundRepeat:"no-repeat",
+        background:"linear-gradient(165deg, #0a0f1e 0%, #0c1425 35%, #091220 65%, #070d19 100%)",
       }} />
-      {/* Radial vignette — spotlight on center content */}
+
+      {/* Layer 2: Flowing topographic gradients (Forest Green + Soča Emerald) */}
       <div style={{
-        position:"fixed", inset:0, zIndex:0,
-        background:`radial-gradient(ellipse 80% 70% at 50% 45%,
-          rgba(5,15,8,0.32) 0%, rgba(5,15,8,0.50) 50%, rgba(5,15,8,0.72) 100%)`,
-        pointerEvents:"none",
+        position:"fixed", inset:0, zIndex:0, pointerEvents:"none",
+        background:`
+          radial-gradient(ellipse 80% 50% at 20% 70%, rgba(15,74,46,0.35) 0%, transparent 70%),
+          radial-gradient(ellipse 60% 80% at 75% 30%, rgba(15,74,46,0.20) 0%, transparent 60%),
+          radial-gradient(ellipse 50% 40% at 45% 55%, rgba(114,176,29,0.08) 0%, transparent 50%),
+          radial-gradient(ellipse 90% 60% at 60% 80%, rgba(114,176,29,0.06) 0%, transparent 65%),
+          conic-gradient(from 200deg at 30% 60%, transparent 0deg, rgba(15,74,46,0.18) 60deg, transparent 120deg, rgba(114,176,29,0.05) 200deg, transparent 280deg),
+          conic-gradient(from 340deg at 70% 40%, transparent 0deg, rgba(91,163,217,0.06) 45deg, transparent 90deg, rgba(15,74,46,0.12) 180deg, transparent 240deg)
+        `,
       }} />
-      {/* Top/bottom bands for header & footer */}
+
+      {/* Layer 3: Triglav White mountain glow (upper-right) */}
       <div style={{
+        position:"fixed", inset:0, zIndex:0, pointerEvents:"none",
+        background:`
+          radial-gradient(ellipse 45% 35% at 80% 15%, rgba(255,255,255,0.06) 0%, transparent 50%),
+          radial-gradient(ellipse 30% 25% at 85% 10%, rgba(200,220,255,0.03) 0%, transparent 40%)
+        `,
+      }} />
+
+      {/* Layer 4: SVG topographic contour lines */}
+      <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" style={{
         position:"fixed", inset:0, zIndex:0,
-        background:`linear-gradient(to bottom,
-          rgba(5,15,8,0.55) 0%, transparent 12%, transparent 88%, rgba(5,15,8,0.60) 100%)`,
+        width:"100%", height:"100%",
+        pointerEvents:"none", opacity:0.055,
+      }}>
+        <g stroke="rgba(114,176,29,0.5)" strokeWidth="0.8" fill="none">
+          {TOPO_PATHS.map((d,i) => <path key={i} d={d} />)}
+        </g>
+      </svg>
+
+      {/* Layer 5: Gold dust particle canvas */}
+      <canvas ref={canvasRef} style={{
+        position:"fixed", inset:0, zIndex:0,
+        width:"100%", height:"100%",
         pointerEvents:"none",
       }} />
     </>
@@ -255,9 +353,9 @@ function StepHeader({ step, total, title, sub, color, html }: {
         </span>
       </div>
       {html
-        ? <h2 style={{ fontFamily:sans, fontSize:"clamp(1.5rem,4.5vw,2.2rem)", fontWeight:800, lineHeight:1.15, marginBottom:S.sm+2, color:C.white }}
+        ? <h2 style={{ fontFamily:sans, fontSize:"clamp(1.5rem,4.5vw,2.2rem)", fontWeight:800, lineHeight:1.15, marginBottom:S.sm+2, color:C.white, letterSpacing:"-0.02em" }}
             dangerouslySetInnerHTML={{ __html: title }} />
-        : <h2 style={{ fontFamily:sans, fontSize:"clamp(1.5rem,4.5vw,2.2rem)", fontWeight:800, lineHeight:1.15, marginBottom:S.sm+2, color:C.white }}>{title}</h2>
+        : <h2 style={{ fontFamily:sans, fontSize:"clamp(1.5rem,4.5vw,2.2rem)", fontWeight:800, lineHeight:1.15, marginBottom:S.sm+2, color:C.white, letterSpacing:"-0.02em" }}>{title}</h2>
       }
       <p style={{ color:C.muted, fontSize:"0.88rem", lineHeight:1.75 }}>{sub}</p>
     </div>
@@ -266,7 +364,7 @@ function StepHeader({ step, total, title, sub, color, html }: {
 
 // ═══════════════════════════════════════════════════════════
 //  CINEMATIC INTRO — "Srce Slovenije" (Heart of Slovenia)
-//  5.8s sequence: Peak → Flow → Connection → Fade
+//  6s sequence: Peak → Flow → Connection → Dissolve
 // ═══════════════════════════════════════════════════════════
 
 interface Particle {
@@ -279,22 +377,18 @@ function CinematicIntro({ onDone }: { onDone:()=>void }) {
   const rafRef = useRef<number>(0);
   const [fadeOut, setFadeOut] = useState(false);
 
-  // ── Gold dust particle system ──
+  // ── Gold dust particle system (intro-density: 50 particles) ──
   useEffect(() => {
-    // Respect reduced-motion preference
     if (typeof window !== "undefined" &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      onDone();
-      return;
+      onDone(); return;
     }
-
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
-
     const resize = () => {
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
@@ -305,177 +399,154 @@ function CinematicIntro({ onDone }: { onDone:()=>void }) {
 
     const COUNT = window.innerWidth < 768 ? 30 : 50;
     const particles: Particle[] = [];
-
     const spawn = (): Particle => ({
-      x: Math.random(),
-      y: Math.random(),
+      x: Math.random(), y: Math.random(),
       vx: (Math.random() - 0.5) * 0.0003,
       vy: -Math.random() * 0.0004 - 0.0001,
       size: Math.random() * 2 + 0.5,
       opacity: Math.random() * 0.6 + 0.2,
-      life: 1,
-      decay: Math.random() * 0.003 + 0.001,
+      life: 1, decay: Math.random() * 0.003 + 0.001,
     });
-
     for (let i = 0; i < COUNT; i++) {
-      const p = spawn();
-      p.life = Math.random(); // stagger initial life
-      particles.push(p);
+      const p = spawn(); p.life = Math.random(); particles.push(p);
     }
 
     const animate = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      const w = window.innerWidth, h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
       ctx.globalCompositeOperation = "lighter";
-
       for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life -= p.decay;
-
-        if (p.life <= 0 || p.y < -0.05 || p.x < -0.05 || p.x > 1.05) {
-          Object.assign(p, spawn());
-        }
-
-        const sx = p.x * w;
-        const sy = p.y * h;
-        const alpha = p.opacity * Math.max(p.life, 0);
-
-        // Core gold dot
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = "#fbbf24";
-        ctx.beginPath();
-        ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Soft glow halo
+        p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+        if (p.life <= 0 || p.y < -0.05 || p.x < -0.05 || p.x > 1.05) Object.assign(p, spawn());
+        const sx = p.x * w, sy = p.y * h, alpha = p.opacity * Math.max(p.life, 0);
+        ctx.globalAlpha = alpha; ctx.fillStyle = "#fbbf24";
+        ctx.beginPath(); ctx.arc(sx, sy, p.size, 0, Math.PI * 2); ctx.fill();
         ctx.globalAlpha = alpha * 0.25;
-        ctx.beginPath();
-        ctx.arc(sx, sy, p.size * 3.5, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(sx, sy, p.size * 3.5, 0, Math.PI * 2); ctx.fill();
       }
-
-      ctx.globalCompositeOperation = "source-over";
-      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
       rafRef.current = requestAnimationFrame(animate);
     };
-
     rafRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      window.removeEventListener("resize", resize);
-    };
+    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener("resize", resize); };
   }, [onDone]);
 
-  // ── Timing: fade-out + onDone ──
+  // ── Timing: dissolve + onDone ──
   useEffect(() => {
     if (typeof window !== "undefined" &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t1 = setTimeout(() => setFadeOut(true), 5000);
-    const t2 = setTimeout(() => onDone(), 5800);
+    const t2 = setTimeout(() => onDone(), 6000);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onDone]);
 
-  // Heart SVG path
   const heartPath = "M100,180 C60,140 10,120 10,80 C10,40 40,20 70,20 C85,20 95,30 100,45 C105,30 115,20 130,20 C160,20 190,40 190,80 C190,120 140,140 100,180 Z";
 
   return (
     <div style={{
       position:"fixed", inset:0, zIndex:100,
-      overflow:"hidden",
-      background:"#050f08",
+      overflow:"hidden", background:"#0a0f1e",
       opacity: fadeOut ? 0 : 1,
-      transition:"opacity 0.8s ease-out",
+      transition:"opacity 1.0s cubic-bezier(0.4, 0, 0.2, 1)",
     }}>
-      {/* Layer 1: Background with Ken Burns zoom/pan + saturation */}
+      {/* Layer 1a: Animated gradient blob A (forest green, bottom-left → center) */}
       <div style={{
-        position:"absolute",
-        top:"-25%", left:"-25%",
-        width:"150%", height:"150%",
-        backgroundImage:"url(/slovenia-bg.jpg)",
-        backgroundSize:"cover",
-        backgroundPosition:"center center",
-        animation:"srce-ken-burns 5s cubic-bezier(0.25,0.1,0.25,1) forwards, srce-saturation 5s ease forwards",
-        willChange:"transform, filter",
+        position:"absolute", width:"120%", height:"120%", left:"-10%", top:"-10%",
+        borderRadius:"50%", pointerEvents:"none",
+        background:"radial-gradient(ellipse at center, rgba(15,74,46,0.5) 0%, transparent 70%)",
+        animation:"srce-blob-a 5s ease forwards",
+        willChange:"transform, opacity",
       }} />
 
-      {/* Layer 1b: Golden morning glow (The Peak, 0-2s) */}
+      {/* Layer 1b: Animated gradient blob B (emerald, upper-right → center) */}
       <div style={{
-        position:"absolute", inset:0,
+        position:"absolute", width:"100%", height:"100%", right:"-20%", top:"-20%",
+        borderRadius:"50%", pointerEvents:"none",
+        background:"radial-gradient(ellipse at center, rgba(114,176,29,0.2) 0%, transparent 60%)",
+        animation:"srce-blob-b 5s ease forwards",
+        willChange:"transform, opacity",
+      }} />
+
+      {/* Layer 1c: Mountain ridge silhouette (The Peak) */}
+      <svg viewBox="0 0 1200 200" preserveAspectRatio="none" style={{
+        position:"absolute", top:0, left:0, right:0, height:"25vh",
+        opacity:0, pointerEvents:"none",
+        animation:"srce-ridge-appear 4s ease 0.3s forwards",
+      }}>
+        <path
+          d="M0,200 L0,140 C100,130 180,80 280,100 C380,120 420,60 520,50 C580,44 640,70 720,55 C800,40 860,65 940,48 C1020,32 1080,60 1200,45 L1200,200 Z"
+          fill="rgba(255,255,255,0.025)"
+        />
+        <path
+          d="M0,200 L0,155 C120,148 200,105 320,118 C440,131 480,85 580,75 C660,67 720,90 800,78 C880,66 940,82 1040,68 C1100,58 1160,75 1200,65 L1200,200 Z"
+          fill="rgba(255,255,255,0.015)"
+        />
+      </svg>
+
+      {/* Layer 1d: Topographic lines with animated glow */}
+      <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" style={{
+        position:"absolute", inset:0, width:"100%", height:"100%",
+        pointerEvents:"none",
+        animation:"srce-topo-pulse 5s ease forwards",
+        willChange:"opacity, filter",
+      }}>
+        <g stroke="rgba(114,176,29,0.4)" strokeWidth="1" fill="none">
+          {TOPO_PATHS.map((d,i) => <path key={i} d={d} />)}
+        </g>
+      </svg>
+
+      {/* Layer 1e: Golden morning glow (The Peak, 0-2s) */}
+      <div style={{
+        position:"absolute", inset:0, pointerEvents:"none",
         background:"linear-gradient(135deg, rgba(251,191,36,0.4), rgba(212,160,23,0.25), transparent 70%)",
         animation:"srce-tint-gold 5s ease forwards",
-        pointerEvents:"none",
       }} />
 
-      {/* Layer 1c: Emerald tint (The Flow, 2-4s) */}
+      {/* Layer 1f: Emerald tint (The Flow, 2-4s) */}
       <div style={{
-        position:"absolute", inset:0,
+        position:"absolute", inset:0, pointerEvents:"none",
         background:"linear-gradient(180deg, transparent 20%, rgba(114,176,29,0.3), rgba(91,163,217,0.1))",
         animation:"srce-tint-emerald 5s ease forwards",
-        pointerEvents:"none",
       }} />
 
-      {/* Layer 1d: Cinematic vignette (always on) */}
+      {/* Layer 1g: Cinematic vignette */}
       <div style={{
-        position:"absolute", inset:0,
-        background:"radial-gradient(ellipse 70% 60% at 50% 45%, transparent 0%, rgba(5,15,8,0.6) 100%)",
-        pointerEvents:"none",
+        position:"absolute", inset:0, pointerEvents:"none",
+        background:"radial-gradient(ellipse 70% 60% at 50% 45%, transparent 0%, rgba(10,15,30,0.6) 100%)",
       }} />
 
       {/* Layer 2: Gold dust particle canvas */}
       <canvas ref={canvasRef} style={{
-        position:"absolute", inset:0,
-        width:"100%", height:"100%",
-        pointerEvents:"none",
+        position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none",
       }} />
 
       {/* Layer 3: Heart SVG outline (The Connection, 4-5s) */}
       <svg viewBox="0 0 200 200" style={{
-        position:"absolute",
-        top:"50%", left:"50%",
-        width:"clamp(120px, 28vw, 200px)",
-        height:"clamp(120px, 28vw, 200px)",
-        transform:"translate(-50%, -55%)",
-        opacity:0,
+        position:"absolute", top:"50%", left:"50%",
+        width:"clamp(120px, 28vw, 200px)", height:"clamp(120px, 28vw, 200px)",
+        transform:"translate(-50%, -55%)", opacity:0,
         animation:"srce-heart-appear 1.0s ease 3.8s forwards",
         filter:"drop-shadow(0 0 16px rgba(251,191,36,0.35))",
         pointerEvents:"none",
       }}>
-        <path
-          d={heartPath}
-          fill="none"
-          stroke="rgba(251,191,36,0.7)"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeDasharray="600"
-          strokeDashoffset="600"
-          style={{ animation:"srce-heart-draw 1.0s ease-in-out 4.0s forwards" }}
-        />
+        <path d={heartPath} fill="none" stroke="rgba(251,191,36,0.7)"
+          strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          strokeDasharray="600" strokeDashoffset="600"
+          style={{ animation:"srce-heart-draw 1.0s ease-in-out 4.0s forwards" }} />
       </svg>
 
       {/* Layer 4: Tagline */}
       <div style={{
-        position:"absolute",
-        bottom:"22%", left:0, right:0,
-        textAlign:"center",
-        padding:`0 ${S.lg}px`,
-        opacity:0,
-        animation:"srce-tagline 1.2s ease 4.3s forwards",
+        position:"absolute", bottom:"22%", left:0, right:0,
+        textAlign:"center", padding:`0 ${S.lg}px`,
+        opacity:0, animation:"srce-tagline 1.2s ease 4.3s forwards",
         pointerEvents:"none",
       }}>
         <span style={{
-          fontFamily:serif,
-          fontSize:"clamp(1rem, 3.2vw, 1.6rem)",
-          color:"rgba(255,255,255,0.85)",
-          fontStyle:"italic",
-          letterSpacing:"0.04em",
-          textShadow:"0 2px 24px rgba(0,0,0,0.6)",
-        }}>
-          Kjer bije tvoje srce.
-        </span>
+          fontFamily:serif, fontSize:"clamp(1rem, 3.2vw, 1.6rem)",
+          color:"rgba(255,255,255,0.85)", fontStyle:"italic",
+          letterSpacing:"0.04em", textShadow:"0 2px 24px rgba(0,0,0,0.6)",
+        }}>Kjer bije tvoje srce.</span>
       </div>
     </div>
   );
@@ -493,7 +564,7 @@ function BetaBanner() {
       backdropFilter:"blur(8px)",
       border:`1px solid rgba(91,163,217,0.20)`,
       borderRadius:R.lg, padding:`${S.md}px ${S.lg}px`,
-      margin:`0 auto ${S.xl}px`, maxWidth:480, position:"relative",
+      margin:`0 auto ${S.xl}px`, maxWidth:520, position:"relative",
     }}>
       <button onClick={() => setDismissed(true)} style={{
         position:"absolute", top:S.sm, right:S.md,
@@ -530,9 +601,9 @@ function SocialProofCounter() {
   return (
     <div style={{
       position:"fixed", bottom:0, left:0, right:0, zIndex:15,
-      background:"rgba(5,15,8,0.80)", backdropFilter:"blur(14px)",
+      background:"rgba(10,15,30,0.80)", backdropFilter:"blur(14px)",
       borderTop:`1px solid ${C.border}`,
-      padding:`${S.sm+2}px ${S.xl}px`,
+      padding:`${S.sm+2}px max(10vw, 24px)`,
       display:"flex", alignItems:"center", justifyContent:"center", gap:S.sm+2,
     }}>
       <span style={{
@@ -582,10 +653,10 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
     <div style={{
       minHeight:"100vh", position:"relative", overflow:"hidden",
       display:"flex", alignItems:"center", justifyContent:"center",
-      padding:`${S.xxl}px ${S.xl}px 160px`,
+      padding:`${S.xxl}px max(10vw, 24px) 160px`,
       opacity: visible ? 1 : 0, transition:"opacity 0.9s ease",
     }}>
-      <div style={{ maxWidth:480, width:"100%", position:"relative", zIndex:1 }}>
+      <div style={{ maxWidth:520, width:"100%", position:"relative", zIndex:1 }}>
 
         {/* ── Brand mark ── */}
         <div style={{ textAlign:"center", marginBottom:S.lg }}>
@@ -748,10 +819,10 @@ function RoleSelect({ onSelect }: { onSelect:(r:Role)=>void }) {
 
   return (
     <FadeSlide id="role">
-      <div style={{ maxWidth:460, margin:"0 auto", padding:`${S.xxl}px ${S.xl}px 160px` }}>
+      <div style={{ maxWidth:500, margin:"0 auto", padding:`${S.xxl}px max(10vw, 24px) 160px` }}>
         <div style={{ textAlign:"center", marginBottom:S.xl+S.sm }}>
           <SectionLabel>Izberi vlogo</SectionLabel>
-          <h2 style={{ fontFamily:sans, fontSize:"clamp(1.7rem,5vw,2.4rem)", fontWeight:800, lineHeight:1.1, color:C.white, marginBottom:S.sm }}>
+          <h2 style={{ fontFamily:sans, fontSize:"clamp(1.7rem,5vw,2.4rem)", fontWeight:800, lineHeight:1.1, color:C.white, marginBottom:S.sm, letterSpacing:"-0.02em" }}>
             Kdo ste?
           </h2>
           <p style={{ color:C.muted, fontSize:"0.88rem", lineHeight:1.75 }}>Glede na vašo vlogo boste prejeli drugačna vprašanja.</p>
@@ -825,7 +896,7 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
 
   const W = (inner: React.ReactNode, stepKey: string) => (
     <FadeSlide id={stepKey}>
-      <div style={{ maxWidth:500, margin:"0 auto", padding:`${S.xxl-8}px ${S.xl}px 160px` }}>{inner}</div>
+      <div style={{ maxWidth:540, margin:"0 auto", padding:`${S.xxl-8}px max(10vw, 24px) 160px` }}>{inner}</div>
     </FadeSlide>
   );
 
@@ -1019,7 +1090,7 @@ function PoliticianSurvey({ onDone }: { onDone:()=>void }) {
 
   const W = (inner: React.ReactNode, stepKey: string) => (
     <FadeSlide id={stepKey}>
-      <div style={{ maxWidth:480, margin:"0 auto", padding:`${S.xxl-8}px ${S.xl}px 160px` }}>{inner}</div>
+      <div style={{ maxWidth:520, margin:"0 auto", padding:`${S.xxl-8}px max(10vw, 24px) 160px` }}>{inner}</div>
     </FadeSlide>
   );
 
@@ -1128,7 +1199,7 @@ function PoliticianSurvey({ onDone }: { onDone:()=>void }) {
 function ThankYou({ role }: { role:Role }) {
   return (
     <FadeSlide id="thankyou">
-      <div style={{ maxWidth:460, margin:"0 auto", textAlign:"center", padding:`60px ${S.xl}px 180px`, position:"relative" }}>
+      <div style={{ maxWidth:500, margin:"0 auto", textAlign:"center", padding:`60px max(10vw, 24px) 180px`, position:"relative" }}>
         <div style={{
           fontSize:"5rem", marginBottom:S.lg, lineHeight:1,
           animation:"cinematic-flag-float 3s ease-in-out infinite",
@@ -1136,7 +1207,7 @@ function ThankYou({ role }: { role:Role }) {
 
         <h2 style={{
           fontFamily:sans, fontSize:"clamp(1.8rem,5vw,2.4rem)", fontWeight:800,
-          color:C.white, marginBottom:S.md, lineHeight:1.15,
+          color:C.white, marginBottom:S.md, lineHeight:1.15, letterSpacing:"-0.02em",
         }}>
           {role==="citizen" ? "Hvala. Vaš glas šteje." : "Hvala. To je pogum."}
         </h2>
@@ -1202,9 +1273,9 @@ function SurveyHeader({ phase, onBack }: { phase: string; onBack:()=>void }) {
   return (
     <div style={{
       position:"sticky", top:0, zIndex:20,
-      background:"rgba(5,15,8,0.75)", backdropFilter:"blur(16px)",
+      background:"rgba(10,15,30,0.75)", backdropFilter:"blur(16px)",
       borderBottom:`1px solid ${C.border}`,
-      padding:`${S.md-2}px ${S.xl}px`,
+      padding:`${S.md-2}px max(10vw, 24px)`,
       display:"flex", alignItems:"center", justifyContent:"space-between",
     }}>
       <div style={{ fontSize:"0.95rem", fontWeight:900, fontFamily:sans, letterSpacing:"-0.02em" }}>
@@ -1242,9 +1313,9 @@ export default function Survey() {
   };
 
   return (
-    <div style={{ minHeight:"100vh", background:"transparent", position:"relative" }}
+    <div style={{ minHeight:"100vh", background:"transparent", position:"relative", letterSpacing:"0.01em" }}
       className={largeText ? "large-text-mode" : ""}>
-      <PhotoBg />
+      <GenerativeBg showParticles={phase !== "cinematic"} />
       {phase === "cinematic" && <CinematicIntro onDone={() => setPhase("intro")} />}
       <div style={{ position:"relative", zIndex:1 }}>
         {phase !== "cinematic" && <SurveyHeader phase={phase} onBack={handleBack} />}
