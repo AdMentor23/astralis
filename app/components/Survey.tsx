@@ -1245,7 +1245,7 @@ function SurveyHeader({ phase, onBack }: { phase: string; onBack:()=>void }) {
       <div style={{ fontSize:"0.95rem", fontWeight:900, fontFamily:sans, letterSpacing:"-0.02em" }}>
         <span style={{ color:C.emerald }}>#</span><span style={{ color:"#f1f5f9" }}>nismofejk</span>
       </div>
-      {phase !== "intro" && phase !== "cinematic" && (
+      {phase !== "intro" && (
         <button onClick={onBack} style={{
           padding:`${S.sm-1}px ${S.md}px`, background:"transparent",
           color:C.muted, border:`1px solid ${C.borderFaint}`,
