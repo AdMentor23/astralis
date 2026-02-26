@@ -54,7 +54,7 @@ const sans  = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
 type Role = "citizen" | "politician";
 type CitizenStep = "identity" | "feeling" | "departments" | "vision" | "politicians" | "wish";
 type PoliticianStep = "identity" | "truth" | "promises" | "gaps" | "ask";
-type SurveyPhase = "cinematic" | "intro" | "role" | "survey" | "thankyou";
+type SurveyPhase = "intro" | "role" | "survey" | "thankyou";
 
 // ═══════════════════════════════════════════════════════════
 //  DATA
@@ -512,229 +512,6 @@ function StepHeader({ step, total, title, sub, color, html }: {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-//  CINEMATIC INTRO — "Srce Slovenije" (Heart of Slovenia)
-//  6s: Draw Triglav → Hold → Morph to Heart → Tagline → Dissolve
-// ═══════════════════════════════════════════════════════════
-
-function CinematicIntro({ onDone }: { onDone:()=>void }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rafRef = useRef<number>(0);
-  const morphDeepRef = useRef<SVGPathElement>(null);
-  const morphMidRef = useRef<SVGPathElement>(null);
-  const morphCoreRef = useRef<SVGPathElement>(null);
-  const [fadeOut, setFadeOut] = useState(false);
-
-  // ── Triglav → Heart morphing animation (JS-driven for smooth interpolation) ──
-  useEffect(() => {
-    if (typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      onDone(); return;
-    }
-    const start = performance.now();
-    let running = true;
-
-    // Timeline (seconds): 0→1.5 draw-on, 1.5→3.5 hold, 3.5→4.5 morph, 4.3→5 tagline, 5→6 dissolve
-    const animateMorph = () => {
-      if (!running) return;
-      const t = (performance.now() - start) / 1000;
-
-      // Compute current path based on timeline
-      let morphT = 0; // 0=Triglav, 1=Heart
-      let drawProgress = 1; // stroke-dashoffset fraction (1=hidden, 0=fully drawn)
-      let pathOpacity = 1;
-
-      if (t < 1.5) {
-        // Phase 1: Draw-on Triglav
-        drawProgress = 1 - Math.min(t / 1.4, 1);
-        morphT = 0;
-        pathOpacity = Math.min(t / 0.3, 1);
-      } else if (t < 3.5) {
-        // Phase 2: Hold Triglav
-        drawProgress = 0;
-        morphT = 0;
-      } else if (t < 4.5) {
-        // Phase 3: Morph Triglav → Heart
-        drawProgress = 0;
-        const mt = (t - 3.5) / 1.0;
-        // Smooth ease-in-out
-        morphT = mt < 0.5 ? 2 * mt * mt : 1 - Math.pow(-2 * mt + 2, 2) / 2;
-      } else {
-        drawProgress = 0;
-        morphT = 1;
-      }
-
-      const d = lerpPath(TRIGLAV_PTS, HEART_PTS, morphT);
-      const deep = morphDeepRef.current;
-      const mid = morphMidRef.current;
-      const core = morphCoreRef.current;
-
-      if (deep && mid && core) {
-        deep.setAttribute("d", d);
-        mid.setAttribute("d", d);
-        core.setAttribute("d", d);
-
-        // Apply draw-on via strokeDashoffset
-        const totalLen = 1200; // approximate path length
-        const offset = drawProgress * totalLen;
-        core.style.strokeDasharray = String(totalLen);
-        core.style.strokeDashoffset = String(offset);
-        mid.style.strokeDasharray = String(totalLen);
-        mid.style.strokeDashoffset = String(offset);
-        deep.style.strokeDasharray = String(totalLen);
-        deep.style.strokeDashoffset = String(offset);
-
-        // Opacity
-        const groupOpacity = pathOpacity * (t > 5.2 ? Math.max(1 - (t - 5.2) / 0.8, 0) : 1);
-        deep.parentElement!.style.opacity = String(groupOpacity);
-      }
-
-      requestAnimationFrame(animateMorph);
-    };
-    requestAnimationFrame(animateMorph);
-    return () => { running = false; };
-  }, [onDone]);
-
-  // ── Gold dust particles (intro density) ──
-  useEffect(() => {
-    if (typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const resize = () => {
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const COUNT = window.innerWidth < 768 ? 30 : 50;
-    interface IntroP { x:number; y:number; vx:number; vy:number; size:number; opacity:number; life:number; decay:number; }
-    const particles: IntroP[] = [];
-    const spawn = (): IntroP => ({
-      x: Math.random(), y: Math.random(),
-      vx: (Math.random() - 0.5) * 0.0003, vy: -Math.random() * 0.0004 - 0.0001,
-      size: Math.random() * 2 + 0.5, opacity: Math.random() * 0.6 + 0.2,
-      life: 1, decay: Math.random() * 0.003 + 0.001,
-    });
-    for (let i = 0; i < COUNT; i++) { const p = spawn(); p.life = Math.random(); particles.push(p); }
-
-    const animate = () => {
-      const w = window.innerWidth, h = window.innerHeight;
-      ctx.clearRect(0, 0, w, h);
-      ctx.globalCompositeOperation = "lighter";
-      for (const p of particles) {
-        p.x += p.vx; p.y += p.vy; p.life -= p.decay;
-        if (p.life <= 0 || p.y < -0.05 || p.x < -0.05 || p.x > 1.05) Object.assign(p, spawn());
-        const sx = p.x * w, sy = p.y * h, alpha = p.opacity * Math.max(p.life, 0);
-        ctx.globalAlpha = alpha; ctx.fillStyle = "#fbbf24";
-        ctx.beginPath(); ctx.arc(sx, sy, p.size, 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = alpha * 0.25;
-        ctx.beginPath(); ctx.arc(sx, sy, p.size * 3.5, 0, Math.PI * 2); ctx.fill();
-      }
-      ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1;
-      rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
-    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener("resize", resize); };
-  }, []);
-
-  // ── Timing: dissolve + onDone ──
-  useEffect(() => {
-    if (typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t1 = setTimeout(() => setFadeOut(true), 5000);
-    const t2 = setTimeout(() => onDone(), 6000);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [onDone]);
-
-  return (
-    <div style={{
-      position:"fixed", inset:0, zIndex:100,
-      overflow:"hidden", background:"#0a0f1e",
-      opacity: fadeOut ? 0 : 1,
-      transition:"opacity 1.0s cubic-bezier(0.4, 0, 0.2, 1)",
-    }}>
-      {/* Animated gradient blobs */}
-      <div style={{
-        position:"absolute", width:"120%", height:"120%", left:"-10%", top:"-10%",
-        borderRadius:"50%", pointerEvents:"none",
-        background:"radial-gradient(ellipse at center, rgba(15,74,46,0.5) 0%, transparent 70%)",
-        animation:"srce-blob-a 5s ease forwards", willChange:"transform, opacity",
-      }} />
-      <div style={{
-        position:"absolute", width:"100%", height:"100%", right:"-20%", top:"-20%",
-        borderRadius:"50%", pointerEvents:"none",
-        background:"radial-gradient(ellipse at center, rgba(122,184,0,0.2) 0%, transparent 60%)",
-        animation:"srce-blob-b 5s ease forwards", willChange:"transform, opacity",
-      }} />
-
-      {/* Golden morning glow */}
-      <div style={{
-        position:"absolute", inset:0, pointerEvents:"none",
-        background:"linear-gradient(135deg, rgba(251,191,36,0.4), rgba(212,160,23,0.25), transparent 70%)",
-        animation:"srce-tint-gold 5s ease forwards",
-      }} />
-      {/* Emerald tint */}
-      <div style={{
-        position:"absolute", inset:0, pointerEvents:"none",
-        background:"linear-gradient(180deg, transparent 20%, rgba(122,184,0,0.3), rgba(91,163,217,0.1))",
-        animation:"srce-tint-emerald 5s ease forwards",
-      }} />
-      {/* Vignette */}
-      <div style={{
-        position:"absolute", inset:0, pointerEvents:"none",
-        background:"radial-gradient(ellipse 70% 60% at 50% 45%, transparent 0%, rgba(10,15,30,0.6) 100%)",
-      }} />
-
-      {/* Gold dust particle canvas */}
-      <canvas ref={canvasRef} style={{
-        position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none",
-      }} />
-
-      {/* Triglav → Heart morphing SVG (centered, multi-layer glow) */}
-      <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style={{
-        position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none",
-      }}>
-        <defs>
-          <filter id="ci-blur-corona" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="12" /></filter>
-          <filter id="ci-blur-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" /></filter>
-          <filter id="ci-triglav-glow" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b1" />
-            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b2" />
-            <feColorMatrix in="b1" type="matrix" values="0 0 0 0 0.95 0 0 0 0 0.75 0 0 0 0 0.14 0 0 0 1.5 0" result="g1" />
-            <feColorMatrix in="b2" type="matrix" values="0 0 0 0 0.85 0 0 0 0 0.65 0 0 0 0 0.10 0 0 0 0.6 0" result="g2" />
-            <feMerge><feMergeNode in="g2" /><feMergeNode in="g1" /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
-        </defs>
-        <g>
-          <path ref={morphDeepRef} d={TRIGLAV_D} stroke="rgba(251,191,36,0.08)" strokeWidth="14" fill="none" filter="url(#ci-blur-corona)" strokeLinecap="round" strokeLinejoin="round" />
-          <path ref={morphMidRef} d={TRIGLAV_D} stroke="rgba(251,191,36,0.18)" strokeWidth="4.5" fill="none" filter="url(#ci-blur-glow)" strokeLinecap="round" strokeLinejoin="round" />
-          <path ref={morphCoreRef} d={TRIGLAV_D} stroke="rgba(251,191,36,0.7)" strokeWidth="1.5" fill="none" filter="url(#ci-triglav-glow)" strokeLinecap="round" strokeLinejoin="round" />
-        </g>
-      </svg>
-
-      {/* Tagline */}
-      <div style={{
-        position:"absolute", bottom:"22%", left:0, right:0,
-        textAlign:"center", padding:`0 ${S.lg}px`,
-        opacity:0, animation:"srce-tagline 1.2s ease 4.3s forwards",
-        pointerEvents:"none",
-      }}>
-        <span style={{
-          fontFamily:serif, fontSize:"clamp(1rem, 3.2vw, 1.6rem)",
-          color:"rgba(255,255,255,0.85)", fontStyle:"italic",
-          letterSpacing:"0.04em", textShadow:"0 2px 24px rgba(0,0,0,0.6)",
-        }}>Kjer bije tvoje srce.</span>
-      </div>
-    </div>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════
 //  BETA BANNER
@@ -1487,10 +1264,13 @@ function SurveyHeader({ phase, onBack }: { phase: string; onBack:()=>void }) {
 //  MAIN
 // ═══════════════════════════════════════════════════════════
 export default function Survey() {
-  const [phase, setPhase] = useState<SurveyPhase>("cinematic");
+  const [phase, setPhase] = useState<SurveyPhase>("intro");
   const [role, setRole] = useState<Role>("citizen");
   const [largeText, setLargeText] = useState(false);
+  const [revealed, setRevealed] = useState(false);
 
+  // Smooth page-reveal on mount
+  useEffect(() => { const t = setTimeout(() => setRevealed(true), 50); return () => clearTimeout(t); }, []);
   useEffect(() => { window.scrollTo({ top:0, behavior:"smooth" }); }, [phase]);
 
   const handleBack = () => {
@@ -1502,11 +1282,15 @@ export default function Survey() {
   return (
     <div style={{ minHeight:"100vh", background:"transparent", position:"relative", letterSpacing:"0.01em" }}
       className={largeText ? "large-text-mode" : ""}>
-      <GenerativeBg showParticles={phase !== "cinematic"} />
-      {phase === "cinematic" && <CinematicIntro onDone={() => setPhase("intro")} />}
-      <div style={{ position:"relative", zIndex:1 }}>
-        {phase !== "cinematic" && <SurveyHeader phase={phase} onBack={handleBack} />}
-        {phase !== "cinematic" && phase !== "thankyou" && (
+      <GenerativeBg showParticles />
+      <div style={{
+        position:"relative", zIndex:1,
+        opacity: revealed ? 1 : 0,
+        transform: revealed ? "translateY(0)" : "translateY(18px)",
+        transition:"opacity 0.9s cubic-bezier(0.22,1,0.36,1), transform 1.1s cubic-bezier(0.22,1,0.36,1)",
+      }}>
+        <SurveyHeader phase={phase} onBack={handleBack} />
+        {phase !== "thankyou" && (
           <AccessibilityToggle largeText={largeText} onToggle={() => setLargeText(p => !p)} />
         )}
         {phase === "intro"     && <IntroScreen onContinue={()=>setPhase("role")} largeText={largeText} />}
@@ -1515,7 +1299,7 @@ export default function Survey() {
         {phase === "survey" && role === "politician" && <PoliticianSurvey onDone={()=>setPhase("thankyou")} />}
         {phase === "thankyou"  && <ThankYou role={role} />}
       </div>
-      {phase !== "cinematic" && <SocialProofCounter />}
+      <SocialProofCounter />
     </div>
   );
 }
