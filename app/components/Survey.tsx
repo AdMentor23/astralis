@@ -656,7 +656,7 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
           textAlign:"center", fontFamily:sans, fontSize:"clamp(0.88rem,2.5vw,1.05rem)",
           color:C.muted, lineHeight:1.8, marginBottom:S.xl, maxWidth:420, marginLeft:"auto", marginRight:"auto",
         }}>
-          Povezujemo gore, vode in ljudi v digitalni prostor, ki diha z nami.
+          Povezujemo ljudi in državo v prostor, kjer se sliši vsak glas.
         </p>
 
         {/* ── Glas, ki razume naše srce ── */}
@@ -704,20 +704,16 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
           border:`1px solid rgba(91,163,217,0.16)`,
           borderRadius:R.xl, padding:`${S.lg}px`, marginBottom:S.xl,
         }}>
-          <SectionLabel color={C.emerald}>Povezujemo gore, vode in ljudi</SectionLabel>
-          <p style={{
-            fontSize:"clamp(1.05rem,3.2vw,1.25rem)", color:C.white, lineHeight:1.75,
-            fontFamily:sans, fontWeight:700, marginBottom:S.lg,
-          }}>
+          <SectionLabel color={C.emerald}>Vaš glas oblikuje Slovenijo</SectionLabel>
+          <p style={{ fontSize:bodyFs, color:C.muted, lineHeight:bodyLh, marginBottom:S.md }}>
             Vaši odgovori oblikujejo sliko resnične Slovenije — ne tiste iz parlamenta,
             ampak tiste, ki jo živite vsak dan.
           </p>
-          <p style={{
-            fontSize:"clamp(1.1rem,3.5vw,1.35rem)", color:C.emerald, lineHeight:1.7,
-            fontFamily:sans, fontWeight:800, marginBottom:S.md,
-          }}>
-            Ali bomo sami začeli graditi svojo prihodnost — ali čakamo,
-            da nam jo določi nekdo drug?
+          <p style={{ fontSize:bodyFs, color:"rgba(255,255,255,0.78)", lineHeight:bodyLh, fontWeight:500, marginBottom:0 }}>
+            <strong style={{ color:C.emerald }}>
+              Ali bomo sami začeli graditi svojo prihodnost — ali čakamo,
+              da nam jo določi nekdo drug?
+            </strong>
           </p>
         </div>
 
