@@ -551,12 +551,16 @@ function BetaBanner() {
 //  SOCIAL PROOF COUNTER
 // ═══════════════════════════════════════════════════════════
 function SocialProofCounter() {
-  const [count, setCount] = useState(147);
-  const mounted = useRef(false);
+  const [count, setCount] = useState(148);
   useEffect(() => {
-    mounted.current = true;
-    const interval = setInterval(() => { if (mounted.current) setCount(c => c + (Math.random() > 0.7 ? 1 : 0)); }, 8000);
-    return () => { mounted.current = false; clearInterval(interval); };
+    const base = 148;
+    const tick = () => {
+      // Random fluctuation ±12 around base — feels like real users joining/leaving
+      const delta = Math.round((Math.random() - 0.45) * 24);
+      setCount(Math.max(base - 14, base + delta));
+    };
+    const interval = setInterval(tick, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
