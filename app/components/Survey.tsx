@@ -88,22 +88,11 @@ const TRIGLAV_PTS = [
   742,384,760,396,778,392, 796,388,816,368,830,338,
   846,372,866,400,890,418, 918,438,948,456,970,468,
 ];
-const HEART_PTS = [
-  470,468, 485,430,518,388,552,352, 582,322,596,288,605,258,
-  616,226,645,210,680,215, 706,218,717,244,720,274,
-  723,290,724,298,723,304, 722,298,721,290,720,274,
-  724,244,737,218,762,215, 797,210,826,226,836,258,
-  846,288,860,322,890,352, 924,388,957,430,970,468,
-];
 function buildPath(pts: number[]): string {
   let d = `M${pts[0]},${pts[1]}`;
   for (let i = 2; i < pts.length; i += 6)
     d += ` C${pts[i]},${pts[i+1]} ${pts[i+2]},${pts[i+3]} ${pts[i+4]},${pts[i+5]}`;
   return d;
-}
-function lerpPath(a: number[], b: number[], t: number): string {
-  const p = a.map((v, i) => v + (b[i] - v) * t);
-  return buildPath(p);
 }
 const TRIGLAV_D = buildPath(TRIGLAV_PTS);
 const RIVER_LEFT = "M720,465 C700,488 660,505 620,515 C560,530 490,525 420,540 C350,555 280,548 210,562 C140,575 70,570 0,582";
@@ -486,6 +475,32 @@ function ActionBtn({ onClick, disabled, children, large, variant="green" }: {
   );
 }
 
+// ── Back Button (within survey steps) ──
+function BackBtn({ onClick }: { onClick:()=>void }) {
+  return (
+    <button onClick={onClick} style={{
+      background:"transparent", border:`1px solid ${C.borderFaint}`,
+      borderRadius:R.sm, padding:`${S.xs+2}px ${S.md}px`,
+      fontSize:"0.75rem", fontWeight:500, fontFamily:sans, color:C.muted,
+      cursor:"pointer", marginBottom:S.md, transition:"all 0.15s",
+    }}
+      onMouseEnter={e=>{const s=e.currentTarget.style;s.color=C.white;s.borderColor="rgba(122,184,0,0.3)";}}
+      onMouseLeave={e=>{const s=e.currentTarget.style;s.color=C.muted;s.borderColor=C.borderFaint;}}
+    >← Nazaj</button>
+  );
+}
+
+// ── Validation Hint (below disabled buttons) ──
+function ValidationHint({ show, text }: { show:boolean; text:string }) {
+  if (!show) return null;
+  return (
+    <p style={{
+      textAlign:"center", fontSize:"0.72rem", fontFamily:sans,
+      color:C.faint, marginTop:S.sm, lineHeight:1.5, opacity:0.8,
+    }}>{text}</p>
+  );
+}
+
 // ── Section Label (utility text) ──
 function SectionLabel({ children, color=C.triglav }: { children:React.ReactNode; color?:string }) {
   return (
@@ -558,18 +573,6 @@ function BetaBanner() {
 //  SOCIAL PROOF COUNTER
 // ═══════════════════════════════════════════════════════════
 function SocialProofCounter() {
-  const [count, setCount] = useState(148);
-  useEffect(() => {
-    const base = 148;
-    const tick = () => {
-      // Random fluctuation ±12 around base — feels like real users joining/leaving
-      const delta = Math.round((Math.random() - 0.45) * 24);
-      setCount(Math.max(base - 14, base + delta));
-    };
-    const interval = setInterval(tick, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div style={{
       position:"fixed", bottom:0, left:0, right:0, zIndex:15,
@@ -583,7 +586,7 @@ function SocialProofCounter() {
         background:C.emerald, animation:"pulse-dot 1.8s ease-in-out infinite",
       }} />
       <span style={{ fontSize:"0.75rem", color:C.muted, fontFamily:sans }}>
-        Trenutno aktivnih uporabnikov: <strong style={{ color:C.white, fontWeight:700 }}>{count}</strong>
+        Anketa je aktivna · <strong style={{ color:C.white, fontWeight:700 }}>Vsak glas šteje</strong>
       </span>
     </div>
   );
@@ -733,7 +736,7 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
           {[
             { v:"2.100.000+", l:"Slovencev",               c:C.emerald },
             { v:"3.600+",     l:"Izvoljenih funkcionarjev", c:C.gold },
-            { v:"~5 min",     l:"Čas izpolnjevanja",        c:C.emeraldMid },
+            { v:"~3 min",     l:"Čas izpolnjevanja",        c:C.emeraldMid },
           ].map((s,i) => (
             <div key={i} style={{
               flex:1, padding:`${S.md}px ${S.sm}px`, textAlign:"center",
@@ -807,7 +810,7 @@ function RoleSelect({ onSelect }: { onSelect:(r:Role)=>void }) {
             <div style={{ fontSize:"0.84rem", fontFamily:sans, color:C.muted, lineHeight:1.7 }}>
               Celo življenje ste bili zraven. Danes pa končno nekdo vpraša — kaj si vi mislite?
             </div>
-            <div style={{ marginTop:S.md, fontSize:"0.72rem", fontFamily:sans, color:C.emeraldMid, fontWeight:700 }}>6 korakov · ~5 minut →</div>
+            <div style={{ marginTop:S.md, fontSize:"0.72rem", fontFamily:sans, color:C.emeraldMid, fontWeight:700 }}>6 korakov · ~3 minute →</div>
           </button>
 
           <button onClick={() => onSelect("politician")} style={roleBtn(C.gold, C.goldDim)}
@@ -842,10 +845,16 @@ function RoleSelect({ onSelect }: { onSelect:(r:Role)=>void }) {
 // ═══════════════════════════════════════════════════════════
 //  CITIZEN SURVEY
 // ═══════════════════════════════════════════════════════════
-function CitizenSurvey({ onDone }: { onDone:()=>void }) {
+function CitizenSurvey({ onDone, onBack }: { onDone:()=>void; onBack:()=>void }) {
   const TOTAL = 6;
   const [step, setStep] = useState<CitizenStep>("identity");
   const idx: Record<CitizenStep,number> = { identity:0, feeling:1, departments:2, vision:3, politicians:4, wish:5 };
+  const stepOrder: CitizenStep[] = ["identity","feeling","departments","vision","politicians","wish"];
+  const prevStep = () => {
+    const ci = stepOrder.indexOf(step);
+    if (ci <= 0) onBack();
+    else { setStep(stepOrder[ci - 1]); window.scrollTo({ top:0, behavior:"smooth" }); }
+  };
 
   const [region, setRegion] = useState("");
   const [age, setAge] = useState("");
@@ -875,6 +884,7 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
 
   if (step === "identity") return W(<>
     {H(idx.identity, "Povejte nam, kdo ste.", "Anonimno. Nobenih imen — samo da vidimo celotno sliko Slovenije.")}
+    <BackBtn onClick={prevStep} />
     <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:S.md, marginBottom:S.lg }}>
       <div>
         <label style={{ fontSize:"0.75rem", fontFamily:sans, color:C.muted, fontWeight:600, display:"block", marginBottom:S.xs+2 }}>Regija</label>
@@ -892,10 +902,12 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
       </div>
     </div>
     <ActionBtn onClick={()=>setStep("feeling")} disabled={!region||!age}>Naprej →</ActionBtn>
+    <ValidationHint show={!region||!age} text="Izberite regijo in starost" />
   </>, "c-identity");
 
   if (step === "feeling") return W(<>
     {H(idx.feeling, "Kako se počutite v Sloveniji?", "Nikoli vas niso vprašali. Danes vas vprašamo. Ni napačnega odgovora.")}
+    <BackBtn onClick={prevStep} />
     <Card>
       <div style={{ fontSize:"0.84rem", fontWeight:700, fontFamily:sans, color:C.white, marginBottom:S.md }}>Na lestvici 1–10: kako dober kraj za življenje je Slovenija <em>za vas</em>?</div>
       <RatingScale value={feelingScore} onChange={setFeelingScore} color={C.emerald} />
@@ -925,11 +937,13 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
       <textarea className="app-input" rows={3} placeholder="Npr: 'Potencial imamo, politična volja manjka.'" value={feelingText} onChange={e=>setFeelingText(e.target.value)} style={{ resize:"none", fontSize:"0.88rem" }} />
     </Card>
     <ActionBtn onClick={()=>setStep("departments")} disabled={feelingScore===null||thumb===null}>Naprej →</ActionBtn>
+    <ValidationHint show={feelingScore===null||thumb===null} text="Ocenite počutje in izberite smer" />
   </>, "c-feeling");
 
   if (step === "departments") return W(<>
     {H(idx.departments, "Ocenite vsako področje.", "1 = zelo slabo · 10 = odlično. Bodite realni, brez zadržkov.")}
-    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:S.sm+2, marginBottom:S.lg }}>
+    <BackBtn onClick={prevStep} />
+    <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(240px, 1fr))", gap:S.sm+2, marginBottom:S.lg }}>
       {DEPARTMENTS.map(d=>(
         <div key={d.id} style={{
           background:C.glass, backdropFilter:"blur(8px)",
@@ -960,13 +974,15 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
     <ActionBtn onClick={()=>setStep("vision")} disabled={Object.keys(deptScores).length<DEPARTMENTS.length}>
       {Object.keys(deptScores).length<DEPARTMENTS.length?`Ocenite vsa področja (${Object.keys(deptScores).length}/${DEPARTMENTS.length})`:"Naprej →"}
     </ActionBtn>
+    <ValidationHint show={Object.keys(deptScores).length<DEPARTMENTS.length} text={`Ocenite vsa področja (${Object.keys(deptScores).length}/${DEPARTMENTS.length})`} />
   </>, "c-departments");
 
   if (step === "vision") return W(<>
     {H(idx.vision, "Kaj bi vi naredili?", "Ne bodite skromni — bodite realni. To je vaša Slovenija.")}
+    <BackBtn onClick={prevStep} />
     <Card>
       <div style={{ fontSize:"0.84rem", fontWeight:700, fontFamily:sans, color:C.white, marginBottom:S.md }}>Izberite 3 najpomembnejše prioritete za Slovenijo:</div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:S.sm }}>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(160px, 1fr))", gap:S.sm }}>
         {DEPARTMENTS.map(d=>{
           const sel=visionTop3.includes(d.id);
           return (
@@ -991,10 +1007,12 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
       <textarea className="app-input" rows={5} placeholder="Npr: 'Hočem, da se moj otrok ne sprašuje, ali bo imel streho nad glavo.'" value={visionText} onChange={e=>setVisionText(e.target.value)} style={{ resize:"none", fontSize:"0.88rem" }} />
     </Card>
     <ActionBtn onClick={()=>setStep("politicians")} disabled={visionTop3.length<3||!visionText.trim()}>Naprej →</ActionBtn>
+    <ValidationHint show={visionTop3.length<3||!visionText.trim()} text="Izberite 3 prioritete in opišite vizijo" />
   </>, "c-vision");
 
   if (step === "politicians") return W(<>
     {H(idx.politicians, "O politikih — odkrito.", "Nihče vas ne bo obsojal. Povejte, kar si resnično mislite.")}
+    <BackBtn onClick={prevStep} />
     <Card>
       <div style={{ fontSize:"0.84rem", fontWeight:700, fontFamily:sans, color:C.white, marginBottom:S.md }}>Na lestvici 1–10: koliko zaupate Slovenskim politikom?</div>
       <RatingScale value={polTrust} onChange={setPolTrust} color={C.purple} />
@@ -1008,10 +1026,12 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
       <textarea className="app-input" rows={4} placeholder="Npr: 'Nehajte se prepirati in delajte.'" value={polFeedback} onChange={e=>setPolFeedback(e.target.value)} style={{ resize:"none", fontSize:"0.88rem" }} />
     </Card>
     <ActionBtn onClick={()=>setStep("wish")} disabled={polTrust===null}>Naprej →</ActionBtn>
+    <ValidationHint show={polTrust===null} text="Ocenite zaupanje" />
   </>, "c-politicians");
 
   if (step === "wish") return W(<>
     {H(idx.wish, "Ena želja.<br/>Katera bi bila?", "Jutri boste prebrali: 'Slovenija je naredila X.' Kaj bi si želeli, da je ta X?", true)}
+    <BackBtn onClick={prevStep} />
     <Card>
       <div style={{ fontSize:"0.84rem", fontWeight:700, fontFamily:sans, color:C.white, marginBottom:S.sm+2 }}>Moja ena želja za Slovenijo:</div>
       <textarea className="app-input" rows={4} placeholder="Npr: 'Da pridemo k zdravniku v enem tednu, ne v enem letu.'" value={wish} onChange={e=>setWish(e.target.value)} style={{ resize:"none", fontSize:"0.88rem" }} />
@@ -1032,6 +1052,7 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
       </div>
     </Card>
     <ActionBtn onClick={onDone} disabled={!wish.trim()||!wishRealistic} large>Oddaj odgovor 🇸🇮</ActionBtn>
+    <ValidationHint show={!wish.trim()||!wishRealistic} text="Napišite željo in izberite odgovor" />
   </>, "c-wish");
 
   return null;
@@ -1040,10 +1061,16 @@ function CitizenSurvey({ onDone }: { onDone:()=>void }) {
 // ═══════════════════════════════════════════════════════════
 //  POLITICIAN SURVEY
 // ═══════════════════════════════════════════════════════════
-function PoliticianSurvey({ onDone }: { onDone:()=>void }) {
+function PoliticianSurvey({ onDone, onBack }: { onDone:()=>void; onBack:()=>void }) {
   const TOTAL = 5;
   const [step, setStep] = useState<PoliticianStep>("identity");
   const idx: Record<PoliticianStep,number> = { identity:0, truth:1, promises:2, gaps:3, ask:4 };
+  const stepOrder: PoliticianStep[] = ["identity","truth","promises","gaps","ask"];
+  const prevStep = () => {
+    const ci = stepOrder.indexOf(step);
+    if (ci <= 0) onBack();
+    else { setStep(stepOrder[ci - 1]); window.scrollTo({ top:0, behavior:"smooth" }); }
+  };
 
   const [dept, setDept] = useState("");
   const [years, setYears] = useState("");
@@ -1069,6 +1096,7 @@ function PoliticianSurvey({ onDone }: { onDone:()=>void }) {
 
   if (step === "identity") return W(<>
     {H(idx.identity, "Postavite vse na mizo.", "Ni PR-a, ni kamere. Samo vi in vprašanja.")}
+    <BackBtn onClick={prevStep} />
     <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:S.md, marginBottom:S.lg }}>
       <div>
         <label style={{ fontSize:"0.75rem", fontFamily:sans, color:C.muted, fontWeight:600, display:"block", marginBottom:S.xs+2 }}>Področje</label>
@@ -1086,10 +1114,12 @@ function PoliticianSurvey({ onDone }: { onDone:()=>void }) {
       </div>
     </div>
     <ActionBtn onClick={()=>setStep("truth")} disabled={!dept||!years} variant="gold">Naprej →</ActionBtn>
+    <ValidationHint show={!dept||!years} text="Izberite področje in leta v politiki" />
   </>, "p-identity");
 
   if (step === "truth") return W(<>
     {H(idx.truth, "Resnica brez kamere.", "Ni moderatorja, ni nasprotnika. Samo vprašanje in vi.")}
+    <BackBtn onClick={prevStep} />
     <Card gold>
       <div style={{ fontSize:"0.84rem", fontWeight:700, fontFamily:sans, color:C.white, marginBottom:S.md }}>Na lestvici 1–10: kako dobro ste po vašem mnenju opravili svoje delo?</div>
       <RatingScale value={selfScore} onChange={setSelfScore} color={C.gold} />
@@ -1107,10 +1137,12 @@ function PoliticianSurvey({ onDone }: { onDone:()=>void }) {
       <textarea className="app-input" rows={3} placeholder="Iskrenost je vredna več kot vsak PR." value={failure} onChange={e=>setFailure(e.target.value)} style={{ resize:"none", fontSize:"0.88rem" }} />
     </Card>
     <ActionBtn onClick={()=>setStep("promises")} disabled={selfScore===null||!achievement.trim()||!failure.trim()} variant="gold">Naprej →</ActionBtn>
+    <ValidationHint show={selfScore===null||!achievement.trim()||!failure.trim()} text="Ocenite delo, vpišite dosežek in napako" />
   </>, "p-truth");
 
   if (step === "promises") return W(<>
     {H(idx.promises, "Obljube vs. realnost.", "Vsak politik vstopi s cilji. Koliko ste jih dosegli?")}
+    <BackBtn onClick={prevStep} />
     <Card gold>
       <div style={{ fontSize:"0.84rem", fontWeight:700, fontFamily:sans, color:C.white, marginBottom:S.md }}>Koliko % predvolilnih obljub ste izpolnili?</div>
       <div style={{ display:"flex", gap:S.sm, flexWrap:"wrap" }}>
@@ -1131,10 +1163,12 @@ function PoliticianSurvey({ onDone }: { onDone:()=>void }) {
       <textarea className="app-input" rows={4} placeholder="Sistem? Koalicijsko usklajevanje? Proračun?" value={promisesWhy} onChange={e=>setPromisesWhy(e.target.value)} style={{ resize:"none", fontSize:"0.88rem" }} />
     </Card>
     <ActionBtn onClick={()=>setStep("gaps")} disabled={promisesKept===null||!promisesWhy.trim()} variant="gold">Naprej →</ActionBtn>
+    <ValidationHint show={promisesKept===null||!promisesWhy.trim()} text="Izberite odstotek in pojasnite" />
   </>, "p-promises");
 
   if (step === "gaps") return W(<>
     {H(idx.gaps, "Kaj bi spremenili?", "Če bi imeli popolno moč za en dan — kaj bi naredili?")}
+    <BackBtn onClick={prevStep} />
     <Card gold>
       <div style={{ fontSize:"0.84rem", fontWeight:700, fontFamily:sans, color:C.white, marginBottom:S.sm }}>Kaj je največja sistemska ovira v Slovenski politiki?</div>
       <textarea className="app-input" rows={3} placeholder="Birokracija? Koalicijsko usklajevanje? Kratki mandati?" value={obstacle} onChange={e=>setObstacle(e.target.value)} style={{ resize:"none", fontSize:"0.88rem" }} />
@@ -1144,10 +1178,12 @@ function PoliticianSurvey({ onDone }: { onDone:()=>void }) {
       <textarea className="app-input" rows={4} placeholder="Npr: 'Skupna miza brez kamer — odkrita debata brez strankarskih interesov.'" value={wouldChange} onChange={e=>setWouldChange(e.target.value)} style={{ resize:"none", fontSize:"0.88rem" }} />
     </Card>
     <ActionBtn onClick={()=>setStep("ask")} disabled={!obstacle.trim()||!wouldChange.trim()} variant="gold">Naprej →</ActionBtn>
+    <ValidationHint show={!obstacle.trim()||!wouldChange.trim()} text="Opišite oviro in predlagajte spremembo" />
   </>, "p-gaps");
 
   if (step === "ask") return W(<>
     {H(idx.ask, "Vaše sporočilo Slovencem.", "Enkrat — brez medijev, brez stranke. Samo vi in 2,1 milijona Slovencev.")}
+    <BackBtn onClick={prevStep} />
     <Card gold>
       <div style={{ fontSize:"0.84rem", fontWeight:700, fontFamily:sans, color:C.white, marginBottom:S.sm }}>Kaj bi vprašali Slovence, če bi vas jutri resnično poslušali?</div>
       <textarea className="app-input" rows={4} placeholder="Npr: 'Želim vedeti, kaj resnično potrebujete.'" value={askPublic} onChange={e=>setAskPublic(e.target.value)} style={{ resize:"none", fontSize:"0.88rem" }} />
@@ -1157,9 +1193,37 @@ function PoliticianSurvey({ onDone }: { onDone:()=>void }) {
       <textarea className="app-input" rows={3} placeholder="Brez politike. Kot Slovenec / Slovenka — ne kot funkcionar." value={wish} onChange={e=>setWish(e.target.value)} style={{ resize:"none", fontSize:"0.88rem" }} />
     </Card>
     <ActionBtn onClick={onDone} disabled={!askPublic.trim()||!wish.trim()} large variant="gold">Oddaj odgovor 🇸🇮</ActionBtn>
+    <ValidationHint show={!askPublic.trim()||!wish.trim()} text="Napišite sporočilo in željo" />
   </>, "p-ask");
 
   return null;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COPY LINK BUTTON (for share section)
+// ═══════════════════════════════════════════════════════════
+function CopyLinkButton() {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText("https://ai-slovenia.vercel.app/").then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  return (
+    <button onClick={handleCopy} style={{
+      display:"inline-flex", alignItems:"center", gap:S.xs+2,
+      padding:`${S.sm}px ${S.md}px`, borderRadius:R.sm,
+      background: copied ? "rgba(122,184,0,0.12)" : "rgba(255,255,255,0.06)",
+      border:`1px solid ${copied ? "rgba(122,184,0,0.3)" : C.borderFaint}`,
+      color: copied ? C.emerald : C.muted,
+      fontSize:"0.75rem", fontWeight:700, fontFamily:sans,
+      cursor:"pointer", transition:"all 0.15s",
+    }}>
+      <span style={{ fontSize:"1rem" }}>{copied ? "✓" : "🔗"}</span>
+      {copied ? "Kopirano!" : "Kopiraj"}
+    </button>
+  );
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1222,6 +1286,42 @@ function ThankYou({ role }: { role:Role }) {
             Pošljite naprej — vsakemu, ki mu ni vseeno.<br />
             <span style={{ color:C.emerald, fontWeight:600 }}>Slovenija ne rabi pasti. Rabi nas.</span>
           </p>
+          <div style={{ display:"flex", gap:S.sm, marginTop:S.md, flexWrap:"wrap", justifyContent:"center" }}>
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent("Izpolnil/a sem anketo #nismofejk — ker mi ni vseeno za Slovenijo. Izpolni jo tudi ti: https://ai-slovenia.vercel.app/")}`}
+              target="_blank" rel="noopener noreferrer"
+              style={{
+                display:"inline-flex", alignItems:"center", gap:S.xs+2,
+                padding:`${S.sm}px ${S.md}px`, borderRadius:R.sm,
+                background:"rgba(37,211,102,0.12)", border:"1px solid rgba(37,211,102,0.25)",
+                color:"#25d366", fontSize:"0.75rem", fontWeight:700, fontFamily:sans,
+                textDecoration:"none", cursor:"pointer", transition:"all 0.15s",
+              }}
+            >💬 WhatsApp</a>
+            <a
+              href={`https://x.com/intent/tweet?text=${encodeURIComponent("Izpolnil/a sem anketo #nismofejk — ker mi ni vseeno za Slovenijo. Izpolni jo tudi ti:")}&url=${encodeURIComponent("https://ai-slovenia.vercel.app/")}`}
+              target="_blank" rel="noopener noreferrer"
+              style={{
+                display:"inline-flex", alignItems:"center", gap:S.xs+2,
+                padding:`${S.sm}px ${S.md}px`, borderRadius:R.sm,
+                background:"rgba(255,255,255,0.06)", border:`1px solid ${C.borderFaint}`,
+                color:C.muted, fontSize:"0.75rem", fontWeight:700, fontFamily:sans,
+                textDecoration:"none", cursor:"pointer", transition:"all 0.15s",
+              }}
+            >𝕏 Twitter</a>
+            <a
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent("https://ai-slovenia.vercel.app/")}`}
+              target="_blank" rel="noopener noreferrer"
+              style={{
+                display:"inline-flex", alignItems:"center", gap:S.xs+2,
+                padding:`${S.sm}px ${S.md}px`, borderRadius:R.sm,
+                background:"rgba(24,119,242,0.10)", border:"1px solid rgba(24,119,242,0.22)",
+                color:"#1877f2", fontSize:"0.75rem", fontWeight:700, fontFamily:sans,
+                textDecoration:"none", cursor:"pointer", transition:"all 0.15s",
+              }}
+            >📘 Facebook</a>
+            <CopyLinkButton />
+          </div>
         </div>
 
         <div style={{ position:"fixed", bottom:56, right:S.lg, zIndex:10, opacity:0.7, transition:"opacity 0.2s" }}
@@ -1298,8 +1398,8 @@ export default function Survey() {
         )}
         {phase === "intro"     && <IntroScreen onContinue={()=>setPhase("role")} largeText={largeText} />}
         {phase === "role"      && <RoleSelect onSelect={r=>{setRole(r);setPhase("survey");}} />}
-        {phase === "survey" && role === "citizen"    && <CitizenSurvey onDone={()=>setPhase("thankyou")} />}
-        {phase === "survey" && role === "politician" && <PoliticianSurvey onDone={()=>setPhase("thankyou")} />}
+        {phase === "survey" && role === "citizen"    && <CitizenSurvey onDone={()=>setPhase("thankyou")} onBack={()=>setPhase("role")} />}
+        {phase === "survey" && role === "politician" && <PoliticianSurvey onDone={()=>setPhase("thankyou")} onBack={()=>setPhase("role")} />}
         {phase === "thankyou"  && <ThankYou role={role} />}
       </div>
       <SocialProofCounter />
