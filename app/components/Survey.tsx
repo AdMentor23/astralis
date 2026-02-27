@@ -685,15 +685,15 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
               fontStyle:"italic", color:"rgba(255,255,255,0.92)",
               lineHeight:1.8, margin:0,
             }}>
-              &ldquo;Vse življenje sem gradil. Danes pa gledam, kako se ljudje razdvajajo.
-              Vsi delajo za nas, a delajo tako grdo, da je težko gledati.
-              Pozabili smo, da moramo vsi tiščati v isto smer.&rdquo;
+              &ldquo;Vse življenje sem gradil. Danes pa gledam, kako se prepirajo med sabo —
+              namesto da bi delali skupaj. Tako ne bo šlo nikamor.
+              Dokler ne potegnemo vsi v isto smer, se ne bo nič spremenilo.&rdquo;
             </p>
           </div>
 
           <p style={{ fontSize:bodyFs, color:C.muted, lineHeight:bodyLh, margin:0 }}>
-            Želi ostati anonimen, a si želi le eno: da bi mislili dobro o sosedu,
-            tako kot on misli dobro o vas. V harmoniji z domovino.
+            Želi ostati anonimen. Želi si le eno: da nekoč spet potegnemo skupaj,
+            namesto vsak v svojo smer.
           </p>
         </div>
 
