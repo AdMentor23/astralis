@@ -572,8 +572,7 @@ function SocialProofCounter() {
         background:C.emerald, animation:"pulse-dot 1.8s ease-in-out infinite",
       }} />
       <span style={{ fontSize:"0.75rem", color:C.muted, fontFamily:sans }}>
-        <strong style={{ color:C.white, fontWeight:700 }}>{count}</strong> Slovencev
-        že diha z nami.
+        Trenutno aktivnih uporabnikov: <strong style={{ color:C.white, fontWeight:700 }}>{count}</strong>
       </span>
     </div>
   );
