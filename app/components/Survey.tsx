@@ -759,7 +759,7 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
             <span style={{ color:C.emerald, fontWeight:600 }}>se pokaže, kje Slovenija resnično diha.</span>
           </p>
           <div style={{ marginTop:S.md, fontSize:"0.65rem", fontFamily:sans, color:C.faint }}>
-            #nismofejk · 2025
+            #nismofejk · 2026
           </div>
         </div>
       </div>
