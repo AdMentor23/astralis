@@ -665,12 +665,12 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
           border:`1px solid rgba(255,255,255,0.08)`,
           borderRadius:R.xl, padding:`${S.xl+4}px ${S.lg}px`, marginBottom:S.xl,
         }}>
-          <SectionLabel color={C.triglav}>Glas, ki razume naše srce</SectionLabel>
+          <SectionLabel color={C.triglav}>Glas, ki ga čutimo vsi</SectionLabel>
 
           <p style={{ fontSize:bodyFs, color:C.muted, lineHeight:bodyLh, marginBottom:S.lg }}>
-            Obstaja človek, ki ga ne boste nikoli srečali na televiziji ali v parlamentu.
-            Je eden izmed nas — tisti, ki je gradil naše tovarne, stal v vrstah in nikoli zamudil volitev.
-            Glas delavnega, poštenega očeta in dedka.
+            Nekje v Sloveniji živi človek, ki ga ne boste videli na televiziji.
+            Ni politik, ni zvezdnik. Je oče, dedek, delavec — eden izmed nas.
+            Cele življenje je gradil, volil, verjel.
           </p>
 
           {/* Sacred quote */}
@@ -685,15 +685,15 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
               fontStyle:"italic", color:"rgba(255,255,255,0.92)",
               lineHeight:1.8, margin:0,
             }}>
-              &ldquo;Vse življenje sem gradil. Danes pa gledam, kako se prepirajo med sabo —
-              namesto da bi delali skupaj. Tako ne bo šlo nikamor.
-              Dokler ne potegnemo vsi v isto smer, se ne bo nič spremenilo.&rdquo;
+              &ldquo;Gledam, kako se spopadajo med sabo. Levi, desni, sredinski — vseeno.
+              Vsak vleče v svojo smer, nihče pa ne vpraša nas, kaj sploh rabimo.
+              Tako ne bo šlo. Dokler ne potegnemo skupaj, se ne bo nič spremenilo.&rdquo;
             </p>
           </div>
 
           <p style={{ fontSize:bodyFs, color:C.muted, lineHeight:bodyLh, margin:0 }}>
-            Želi ostati anonimen. Želi si le eno: da nekoč spet potegnemo skupaj,
-            namesto vsak v svojo smer.
+            Želi ostati anonimen. Želi si samo eno —
+            da bi nekoč spet znali potegniti skupaj. Kot Slovenci.
           </p>
         </div>
 
