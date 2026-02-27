@@ -705,18 +705,19 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
           borderRadius:R.xl, padding:`${S.lg}px`, marginBottom:S.xl,
         }}>
           <SectionLabel color={C.emerald}>Povezujemo gore, vode in ljudi</SectionLabel>
-          <p style={{ fontSize:bodyFs, color:C.muted, lineHeight:bodyLh, marginBottom:S.md }}>
+          <p style={{
+            fontSize:"clamp(1.05rem,3.2vw,1.25rem)", color:C.white, lineHeight:1.75,
+            fontFamily:sans, fontWeight:700, marginBottom:S.lg,
+          }}>
             Vaši odgovori oblikujejo sliko resnične Slovenije — ne tiste iz parlamenta,
             ampak tiste, ki jo živite vsak dan.
           </p>
-          <p style={{ fontSize:bodyFs, color:"rgba(255,255,255,0.78)", lineHeight:bodyLh, fontWeight:500, marginBottom:0 }}>
-            <strong style={{ color:C.white }}>
-              Ali bomo sami začeli graditi svojo prihodnost — ali čakamo,
-              da nam jo določi nekdo drug?
-            </strong>
-          </p>
-          <p style={{ fontSize:"clamp(0.95rem,3vw,1.05rem)", fontWeight:800, fontFamily:sans, color:C.emerald, marginTop:S.md, marginBottom:0 }}>
-            Začutimo skupni utrip.
+          <p style={{
+            fontSize:"clamp(1.1rem,3.5vw,1.35rem)", color:C.emerald, lineHeight:1.7,
+            fontFamily:sans, fontWeight:800, marginBottom:S.md,
+          }}>
+            Ali bomo sami začeli graditi svojo prihodnost — ali čakamo,
+            da nam jo določi nekdo drug?
           </p>
         </div>
 
