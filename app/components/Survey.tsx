@@ -692,8 +692,8 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
           </div>
 
           <p style={{ fontSize:bodyFs, color:C.muted, lineHeight:bodyLh, margin:0 }}>
-            Želi ostati anonimen. Želi si samo eno —
-            da bi nekoč spet znali potegniti skupaj. Kot Slovenci.
+            Ne želi slave, ne želi pozornosti. Želi si samo,
+            da bi spet znali stati skupaj — kot smo nekoč znali.
           </p>
         </div>
 
