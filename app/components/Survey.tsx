@@ -217,9 +217,15 @@ function GenerativeBg({ showParticles }: { showParticles:boolean }) {
 
   return (
     <>
-      {/* Layer 0: Deep gradient base (midnight→mossy green) */}
+      {/* Single fixed container — prevents mobile scroll jank */}
       <div style={{
         position:"fixed", inset:0, zIndex:0,
+        transform:"translateZ(0)", willChange:"transform",
+        overflow:"hidden",
+      }}>
+      {/* Layer 0: Deep gradient base (midnight→mossy green) */}
+      <div style={{
+        position:"absolute", inset:0,
         background:`
           radial-gradient(ellipse 130% 80% at 50% 105%, rgba(15,74,46,0.42) 0%, transparent 55%),
           radial-gradient(ellipse 80% 50% at 18% 72%, rgba(12,60,38,0.28) 0%, transparent 50%),
@@ -231,7 +237,7 @@ function GenerativeBg({ showParticles }: { showParticles:boolean }) {
 
       {/* Layer 1: SVG — filters, corona, topo lines, Triglav, Soča, peak corona */}
       <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style={{
-        position:"fixed", inset:0, zIndex:0, width:"100%", height:"100%", pointerEvents:"none",
+        position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none",
       }}>
         <defs>
           <filter id="bg-blur-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.2" /></filter>
@@ -336,21 +342,22 @@ function GenerativeBg({ showParticles }: { showParticles:boolean }) {
 
       {/* Layer 2: Gold dust particle canvas */}
       <canvas ref={canvasRef} style={{
-        position:"fixed", inset:0, zIndex:0, width:"100%", height:"100%", pointerEvents:"none",
+        position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none",
       }} />
 
       {/* Layer 3: Noise texture */}
       <div style={{
-        position:"fixed", inset:0, zIndex:0, pointerEvents:"none", opacity:0.03,
+        position:"absolute", inset:0, pointerEvents:"none", opacity:0.03,
         backgroundImage:`url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
         backgroundSize:"256px 256px", mixBlendMode:"overlay",
       }} />
 
       {/* Layer 4: Vignette */}
       <div style={{
-        position:"fixed", inset:0, zIndex:0, pointerEvents:"none",
+        position:"absolute", inset:0, pointerEvents:"none",
         background:"radial-gradient(ellipse 72% 62% at 50% 42%, transparent 0%, rgba(5,10,24,0.5) 100%)",
       }} />
+      </div>{/* end fixed container */}
     </>
   );
 }
