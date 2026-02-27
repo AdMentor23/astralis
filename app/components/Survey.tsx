@@ -739,7 +739,7 @@ function IntroScreen({ onContinue, largeText }: { onContinue:()=>void; largeText
         </div>
 
         {/* ── CTA ── */}
-        <ActionBtn onClick={onContinue} large>Začuti domovino →</ActionBtn>
+        <ActionBtn onClick={onContinue} large>Vstopi v novo poglavje →</ActionBtn>
 
         <p style={{ marginTop:S.md, fontSize:"0.72rem", fontFamily:sans, color:C.faint, lineHeight:1.6, textAlign:"center" }}>
           Anonimno · Brez registracije · Vaš glas se zlije z glasovi vseh
